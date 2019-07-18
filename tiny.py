@@ -1,6 +1,5 @@
 import discord
 
-active_channel = 'sort_nazonazo'
 client = discord.Client()
 
 def read_token():
@@ -13,6 +12,16 @@ def read_token():
     finally:
         return token
 
+def read_active_channel_id():
+    channel_id = -1
+    try:
+        channel_id_file = open('channel_id', 'r')
+        channel_id = int(channel_id_file.read())
+    except:
+        print('failed to find or read channel id file. check your channel id file')
+    finally:
+        return channel_id
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -21,8 +30,13 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
+    if message.channel.id != active_channel_id:
+        return
 
     if message.content.startswith('$hello'):
-        await message.channel.send(active_channel, 'Hello!')
+        await message.channel.send('Hello!')
 
-client.run(read_token())
+
+token = read_token()
+active_channel_id = read_active_channel_id()
+client.run(token)
