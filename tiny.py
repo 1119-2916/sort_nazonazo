@@ -1,4 +1,5 @@
 import discord
+import sys
 
 client = discord.Client()
 
@@ -22,6 +23,41 @@ def read_active_channel_id():
     finally:
         return channel_id
 
+def init_dictionary():
+    dictionary = []
+    try:
+        dictionary_list_file = open('dictionary_list', 'r')
+        for dictionary_file_name in dictionary_list_file:
+            print(dictionary_file_name.replace('\n',''), end='')
+            try:
+                dictionary_file = open(dictionary_file_name.replace('\n',''), 'r')
+                print(' found')
+                for sentence in dictionary_file:
+                    dictionary.append(sentence.replace('\n','').split(' '))
+            except:
+                print(' NOT found')
+    except:
+        print('failed to find or read dictionary list file. check your dictionary list file')
+    finally:
+        return dictionary
+
+# 問題数を知るコマンド
+def cmd_problem_size(cmd):
+    if cmd.find('-size'):
+        print("size command is called")
+        return True
+    else:
+        return False
+
+# init
+dictionary = init_dictionary()
+print('dictionary size : ', len(dictionary))
+if len(dictionary) == 0:
+    print('problem not found')
+    sys.exit()
+token = read_token()
+active_channel_id = read_active_channel_id()
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -32,11 +68,11 @@ async def on_message(message):
         return
     if message.channel.id != active_channel_id:
         return
+    if not client.user in message.mentions:
+        print(message.mentions)
+        return 
 
-    if message.content.startswith('$hello'):
-        await message.channel.send('Hello!')
+    if cmd_problem_size(message.content):
+        await message.channel.send('全部で' + str(len(dictionary)) + '問あります')
 
-
-token = read_token()
-active_channel_id = read_active_channel_id()
 client.run(token)
