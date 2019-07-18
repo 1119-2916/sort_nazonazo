@@ -67,6 +67,14 @@ def hard_reset():
     global answer
     answer = ''
 
+# コマンドを知るコマンド
+def cmd_list(cmd):
+    if cmd.find('-cmd') != -1:
+        print("cmd command is called")
+        return True
+    else:
+        return False
+
 # 問題数を知るコマンド
 def cmd_problem_size(cmd):
     if cmd.find('-size') != -1:
@@ -79,6 +87,14 @@ def cmd_problem_size(cmd):
 def cmd_question(cmd):
     if cmd.find('-prob') != -1:
         print("prob command is called")
+        return True
+    else:
+        return False
+
+# 問題を諦めるコマンド
+def cmd_giveup(cmd):
+    if cmd.find('-giveup') != -1:
+        print("giveup command is called")
         return True
     else:
         return False
@@ -106,8 +122,20 @@ async def on_message(message):
     if message.channel.id != active_channel_id:
         return
     if not client.user in message.mentions:
-        print(message.mentions)
+        if len(message.mentions) == 0 and question_solving and len(message.content) == len(problem):
+            if message.content == answer:
+                response = str(message.author) + ' さん、正解です！\n' + '正解は\"' + answer + '\"でした！'
+                await message.channel.send(response)
+                question_solving = False
+                problem = ''
+                answer = ''
+            # else :
+                # todo : 別解を保持する処理
+                # todo : WA を判定して粋な emoji を打つ
         return 
+
+    if cmd_list(message.content):
+        await message.channel.send('出題: -prob\n問題数を見る: -size\n問題を諦める: -giveup\n困った時は: -reset')
 
     if cmd_problem_size(message.content):
         await message.channel.send('全部で' + str(len(dictionary)) + '問あります')
@@ -115,6 +143,17 @@ async def on_message(message):
     if cmd_reset(message.content):
         hard_reset()
         await message.channel.send('botの状態を初期化します')
+
+    if cmd_giveup(message.content):
+        if question_solving:
+            response = '正解は\"' + answer + '\"でした...'
+            await message.channel.send(response)
+            question_solving = False
+            problem = ''
+            answer = ''
+        else:
+            response = '現在問題は出されていません'
+            await message.channel.send(response)
 
     if cmd_question(message.content):
         if question_solving:
