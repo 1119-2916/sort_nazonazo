@@ -24,7 +24,7 @@ def solve(url):
         texts = pq(x).text().split()
         for item in texts:
             if re_checker.fullmatch(item):
-                print(item)
+                print(item, ''.join(sorted(item)))
 
 # もじぴったん 8文字の言葉 あ〜お
 solve('https://wikiwiki.jp/mojids/8-a')
