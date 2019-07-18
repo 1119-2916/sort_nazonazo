@@ -1,5 +1,6 @@
 import discord
 import sys
+import random
 
 client = discord.Client()
 
@@ -41,13 +42,9 @@ def init_dictionary():
     finally:
         return dictionary
 
-# 問題数を知るコマンド
-def cmd_problem_size(cmd):
-    if cmd.find('-size'):
-        print("size command is called")
-        return True
-    else:
-        return False
+# 辞書から問題を1問取ってくる
+def get_problem(dictionary):
+    return dictionary[random.randrange(len(dictionary))]
 
 # init
 dictionary = init_dictionary()
@@ -57,6 +54,42 @@ if len(dictionary) == 0:
     sys.exit()
 token = read_token()
 active_channel_id = read_active_channel_id()
+question_solving = False
+problem = ''
+answer = ''
+
+# 初期化
+def hard_reset():
+    global question_solving
+    question_solving = False
+    global problem
+    problem = ''
+    global answer
+    answer = ''
+
+# 問題数を知るコマンド
+def cmd_problem_size(cmd):
+    if cmd.find('-size') != -1:
+        print("size command is called")
+        return True
+    else:
+        return False
+
+# 問題を出題するコマンド
+def cmd_question(cmd):
+    if cmd.find('-prob') != -1:
+        print("prob command is called")
+        return True
+    else:
+        return False
+
+# bot の状態を初期化するコマンド
+def cmd_reset(cmd):
+    if cmd.find('-reset') != -1:
+        print("reset command is called")
+        return True
+    else:
+        return False
 
 @client.event
 async def on_ready():
@@ -64,6 +97,10 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    global question_solving
+    global dictionary
+    global problem
+    global answer
     if message.author == client.user:
         return
     if message.channel.id != active_channel_id:
@@ -74,5 +111,21 @@ async def on_message(message):
 
     if cmd_problem_size(message.content):
         await message.channel.send('全部で' + str(len(dictionary)) + '問あります')
+
+    if cmd_reset(message.content):
+        hard_reset()
+        await message.channel.send('botの状態を初期化します')
+
+    if cmd_question(message.content):
+        if question_solving:
+            await message.channel.send('前回の出題が解かれていません')
+        else:
+            question_solving = True
+            tmp = get_problem(dictionary)
+            print(tmp)
+            answer = tmp[0]
+            problem = tmp[1]
+            print(type(problem))
+            await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + problem)
 
 client.run(token)
