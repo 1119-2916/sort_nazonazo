@@ -99,6 +99,14 @@ def cmd_giveup(cmd):
     else:
         return False
 
+# 問題のヒントを出すコマンド
+def cmd_hint(cmd):
+    if cmd.find('-hint') != -1:
+        print("hint command is called")
+        return True
+    else:
+        return False
+
 # bot の状態を初期化するコマンド
 def cmd_reset(cmd):
     if cmd.find('-reset') != -1:
@@ -137,13 +145,10 @@ async def on_message(message):
                 question_solving = False
                 problem = ''
                 answer = ''
-            # else :
-                # todo : 別解を保持する処理
-                # todo : WA を判定して粋な emoji を打つ
         return 
 
     if cmd_list(message.content):
-        await message.channel.send('出題: -prob\n問題数を見る: -size\n問題を諦める: -giveup\n困った時は: -reset')
+        await message.channel.send('出題: -prob\n問題数を見る: -size\n問題のヒントを見る: -hint\n問題を諦める: -giveup\n困った時は: -reset')
 
     if cmd_problem_size(message.content):
         await message.channel.send('全部で' + str(len(dictionary)) + '問あります')
@@ -151,6 +156,14 @@ async def on_message(message):
     if cmd_reset(message.content):
         hard_reset()
         await message.channel.send('botの状態を初期化します')
+
+    if cmd_hint(message.content):
+        if question_solving:
+            response = '先頭の文字は\"' + answer[0] + '\"です'
+            await message.channel.send(response)
+        else:
+            response = '現在問題は出されていません'
+            await message.channel.send(response)
 
     if cmd_giveup(message.content):
         if question_solving:
