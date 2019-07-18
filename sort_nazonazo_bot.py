@@ -107,6 +107,14 @@ def cmd_reset(cmd):
     else:
         return False
 
+# bot を終了するコマンド
+def cmd_quit(cmd):
+    if cmd.find('-bye') != -1:
+        print("bye command is called")
+        return True
+    else:
+        return False
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -157,7 +165,7 @@ async def on_message(message):
 
     if cmd_question(message.content):
         if question_solving:
-            await message.channel.send('前回の出題が解かれていません')
+            await message.channel.send('前回の出題が解かれていません\n問題: ' + problem)
         else:
             question_solving = True
             tmp = get_problem(dictionary)
@@ -166,5 +174,9 @@ async def on_message(message):
             problem = tmp[1]
             print(type(problem))
             await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + problem)
+
+    if cmd_quit(message.content):
+        await message.channel.send('botを終了しました。')
+        sys.exit()
 
 client.run(token)
