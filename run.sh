@@ -1,1 +1,1 @@
-python3 make_dictionary.py
+python3 sort_nazonazo_bot.py
