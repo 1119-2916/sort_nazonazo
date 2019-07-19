@@ -6,6 +6,8 @@ python 3.7.2
 
 discord.py 1.2.3
 
+Ubuntu 16.04.6 LTS
+
 ## bot の動かし方
 
 channel_id, token ファイルの設定が必要です。
