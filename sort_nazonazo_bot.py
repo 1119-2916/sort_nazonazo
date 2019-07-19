@@ -178,12 +178,16 @@ async def run_contest(message):
         return
     contest_problem_num = 1
     for cmds in message.content.split(' '):
+        print(cmds)
         if cmds.isdecimal():
             contest_problem_num = int(cmds)
             break
     if contest_problem_num > 50:
         await message.channel.send(str(contest_problem_num) + '問はちょっと多くない？50問にしますね。')
         contest_problem_num = 50
+    if contest_problem_num <= 0:
+        await message.channel.send(str(contest_problem_num) + '問の出題はできません。1問にしますね。')
+        contest_problem_num = 1
     await message.channel.send(str(contest_problem_num) + '問連続で出題します。')
     await run_question(message)
 
@@ -274,7 +278,7 @@ async def run_hint(message):
         await message.channel.send('答えが知りたい場合は -giveup を使用して下さい。')
         return
     if question_solving:
-        response = '答えは先頭の' + str(hint_length) + '文字は\"' + answer[0:hint_length] + '\"です'
+        response = '答えの先頭' + str(hint_length) + '文字は\"' + answer[0:hint_length] + '\"です'
         await message.channel.send(response)
 
 # bot の状態を初期化するコマンドのパース
@@ -306,6 +310,18 @@ async def run_quit(message):
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
+
+# 待望の機能
+def cmd_kick(cmd):
+    if cmd.find('kick();') != -1:
+        print("kick command is called")
+        return True
+    else:
+        return False
+
+# 待望のコマンド
+async def run_kick(message):
+    await message.channel.send('ヒィンｗ')
 
 @client.event
 async def on_message(message):
@@ -353,6 +369,9 @@ async def on_message(message):
 
     if cmd_unrated(message.content):
         await run_unrated(message)
+
+    if cmd_kick(message.content):
+        await run_kick(message)
 
     if cmd_quit(message.content):
         await run_quit(message)
