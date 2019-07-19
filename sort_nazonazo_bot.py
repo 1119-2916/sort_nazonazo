@@ -181,6 +181,9 @@ async def run_contest(message):
         if cmds.isdecimal():
             contest_problem_num = int(cmds)
             break
+    if contest_problem_num > 50:
+        await message.channel.send(str(contest_problem_num) + '問はちょっと多くない？50問にしますね。')
+        contest_problem_num = 50
     await message.channel.send(str(contest_problem_num) + '問連続で出題します。')
     await run_question(message)
 
@@ -189,11 +192,12 @@ async def contest_continue(message):
     global contest_solving
     global contest_problem_num
     global contest_solving_num
+    if not contest_solving:
+        return 
     if contest_problem_num > contest_solving_num:
         await run_question(message)
     else:
         await message.channel.send(str(contest_problem_num) + '問連続の出題が終了しました。')
-        await print_contest_status(message)
         contest_problem_num = 0
         contest_solving_num = 0
         contest_solving = False
@@ -201,8 +205,8 @@ async def contest_continue(message):
 # コンテストを中止するコマンドのパース
 def cmd_unrated(cmd):
     global contest_solving
-    if cmd.find('-unrated') != -1 and not contest_solving:
-        print("prob command is called")
+    if cmd.find('-unrated') != -1 and contest_solving:
+        print("unrated command is called")
         return True
     else:
         return False
@@ -213,9 +217,11 @@ async def run_unrated(message):
     global contest_problem_num
     global contest_solving_num
     await message.channel.send(str(contest_problem_num) + '問連続の出題を中止します。')
+    contest_solving_num = contest_problem_num
+    contest_solving = False
+    await run_giveup(message)
     contest_problem_num = 0
     contest_solving_num = 0
-    contest_solving = False
 
 # 問題を諦めるコマンドのパース
 def cmd_giveup(cmd):
