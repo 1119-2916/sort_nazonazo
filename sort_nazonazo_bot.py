@@ -75,6 +75,14 @@ def cmd_list(cmd):
     else:
         return False
 
+# テスト用echoコマンド
+def cmd_echo(cmd):
+    if cmd.find('-echo') != -1:
+        print("echo command is called")
+        return True
+    else:
+        return False
+    
 # 問題数を知るコマンド
 def cmd_problem_size(cmd):
     if cmd.find('-size') != -1:
@@ -123,6 +131,10 @@ def cmd_quit(cmd):
     else:
         return False
 
+# テスト用echo関数
+async def run_echo(message):
+    await message.channel.send(message.content)
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -146,6 +158,9 @@ async def on_message(message):
                 problem = ''
                 answer = ''
         return 
+
+    if cmd_echo(message.content):
+        await run_echo(message)
 
     if cmd_list(message.content):
         await message.channel.send('出題: -prob\n問題数を見る: -size\n問題のヒントを見る: -hint\n問題を諦める: -giveup\n困った時は: -reset')
