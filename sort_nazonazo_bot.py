@@ -54,7 +54,12 @@ if len(dictionary) == 0:
     sys.exit()
 token = read_token()
 active_channel_id = read_active_channel_id()
+
+# status
 question_solving = False
+contest_solving = False
+contest_problem_num = 0;
+contest_solving_num = 0;
 problem = ''
 answer = ''
 
@@ -62,6 +67,12 @@ answer = ''
 def hard_reset():
     global question_solving
     question_solving = False
+    global contest_solving
+    contest_solving = False
+    global contest_problem_num
+    contest_problem_num = 0
+    global contest_solving_num
+    contest_solving_num = 0
     global problem
     problem = ''
     global answer
@@ -77,7 +88,19 @@ def cmd_list(cmd):
 
 # コマンドを知るコマンド
 async def run_list(message):
-    await message.channel.send('出題: -prob\n問題数を見る: -size\n問題のヒントを見る: -hint NUM\n問題を諦める: -giveup\n困った時は: -reset')
+    await message.channel.send(
+"""
+echo: -echo
+出題: -prob
+問題数を見る: -size
+問題のヒントを見る: -hint NUM
+問題を諦める: -giveup
+連続で問題を出す: -contest NUM
+連続で問題を出すのを中止する: -unrated
+困った時は: -reset
+botを落とす(再起動は出来ません): -bye
+"""
+)
 
 # テスト用echoコマンドのパース
 def cmd_echo(cmd):
@@ -115,18 +138,84 @@ def cmd_question(cmd):
 # 問題を出題するコマンド
 async def run_question(message):
     global question_solving
+    global contest_solving
+    global contest_problem_num
+    global contest_solving_num
     global dictionary
     global problem
     global answer
     if question_solving:
         await message.channel.send('前回の出題が解かれていません\n問題: ' + problem)
+        return
+    elif contest_solving:
+        await message.channel.send('問 ' + str(contest_solving_num+1) + ' (' + str(contest_solving_num+1) + '/' + str(contest_problem_num) + ')')
+        contest_solving_num += 1
+    question_solving = True
+    tmp = get_problem(dictionary)
+    print(tmp)
+    answer = tmp[0]
+    problem = tmp[1]
+    await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + problem)
+
+# コンテストを出題するコマンドのパース
+def cmd_contest(cmd):
+    global contest_solving
+    if cmd.find('-contest') != -1 and not contest_solving:
+        print("prob command is called")
+        return True
     else:
-        question_solving = True
-        tmp = get_problem(dictionary)
-        print(tmp)
-        answer = tmp[0]
-        problem = tmp[1]
-        await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + problem)
+        return False
+
+# コンテストを出題するコマンド
+async def run_contest(message):
+    global question_solving
+    global contest_solving
+    global contest_problem_num
+    global problem
+    contest_solving = True
+    if question_solving:
+        await message.channel.send('前回の出題が解かれていません\n問題: ' + problem)
+        return
+    contest_problem_num = 1
+    for cmds in message.content.split(' '):
+        if cmds.isdecimal():
+            contest_problem_num = int(cmds)
+            break
+    await message.channel.send(str(contest_problem_num) + '問連続で出題します。')
+    await run_question(message)
+
+# 問題解決処理後にコンテスト中なら出題を続行する
+async def contest_continue(message):
+    global contest_solving
+    global contest_problem_num
+    global contest_solving_num
+    if contest_problem_num > contest_solving_num:
+        await run_question(message)
+    else:
+        await message.channel.send(str(contest_problem_num) + '問連続の出題が終了しました。')
+        await print_contest_status(message)
+        contest_problem_num = 0
+        contest_solving_num = 0
+        contest_solving = False
+
+# コンテストを中止するコマンドのパース
+def cmd_unrated(cmd):
+    global contest_solving
+    if cmd.find('-unrated') != -1 and not contest_solving:
+        print("prob command is called")
+        return True
+    else:
+        return False
+
+# コンテストを中止するコマンド
+async def run_unrated(message):
+    global contest_solving
+    global contest_problem_num
+    global contest_solving_num
+    await message.channel.send(str(contest_problem_num) + '問連続の出題を中止します。')
+    contest_problem_num = 0
+    contest_solving_num = 0
+    contest_solving = False
 
 # 問題を諦めるコマンドのパース
 def cmd_giveup(cmd):
@@ -147,6 +236,7 @@ async def run_giveup(message):
         question_solving = False
         problem = ''
         answer = ''
+        await contest_continue(message)
     else:
         response = '現在問題は出されていません'
         await message.channel.send(response)
@@ -228,6 +318,7 @@ async def on_message(message):
                 question_solving = False
                 problem = ''
                 answer = ''
+                await contest_continue(message)
         return 
 
     if cmd_echo(message.content):
@@ -250,6 +341,12 @@ async def on_message(message):
 
     if cmd_question(message.content):
         await run_question(message)
+
+    if cmd_contest(message.content):
+        await run_contest(message)
+
+    if cmd_unrated(message.content):
+        await run_unrated(message)
 
     if cmd_quit(message.content):
         await run_quit(message)
