@@ -24,10 +24,10 @@ def read_active_channel_id():
     finally:
         return channel_id
 
-def init_dictionary():
+def init_dictionary(src):
     dictionary = []
     try:
-        dictionary_list_file = open('dictionary_list', 'r')
+        dictionary_list_file = open(src, 'r')
         for dictionary_file_name in dictionary_list_file:
             print(dictionary_file_name.replace('\n',''), end='')
             try:
@@ -47,11 +47,13 @@ def get_problem(dictionary):
     return dictionary[random.randrange(len(dictionary))]
 
 # init
-dictionary = init_dictionary()
+dictionary = init_dictionary('dictionary_list')
 print('dictionary size : ', len(dictionary))
 if len(dictionary) == 0:
     print('problem not found')
     sys.exit()
+extra_dictionary = init_dictionary('extra_dictionary_list')
+print('extra_dictionary size : ', len(extra_dictionary))
 token = read_token()
 active_channel_id = read_active_channel_id()
 
@@ -92,6 +94,7 @@ async def run_list(message):
 """
 echo: -echo
 出題: -prob
+extra出題: -english
 問題数を見る: -size
 問題のヒントを見る: -hint NUM
 問題を諦める: -giveup
@@ -152,6 +155,36 @@ async def run_question(message):
         contest_solving_num += 1
     question_solving = True
     tmp = get_problem(dictionary)
+    print(tmp)
+    answer = tmp[0]
+    problem = tmp[1]
+    await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + problem)
+
+# extra問題を出題するコマンドのパース
+def cmd_extra_question(cmd):
+    if cmd.find('-english') != -1:
+        print("english command is called")
+        return True
+    else:
+        return False
+
+# extra問題を出題するコマンド
+async def run_extra_question(message):
+    global question_solving
+    global contest_solving
+    global contest_problem_num
+    global contest_solving_num
+    global extra_dictionary
+    global problem
+    global answer
+    if question_solving:
+        await message.channel.send('前回の出題が解かれていません\n問題: ' + problem)
+        return
+    elif contest_solving:
+        await message.channel.send('問 ' + str(contest_solving_num+1) + ' (' + str(contest_solving_num+1) + '/' + str(contest_problem_num) + ')')
+        contest_solving_num += 1
+    question_solving = True
+    tmp = get_problem(extra_dictionary)
     print(tmp)
     answer = tmp[0]
     problem = tmp[1]
@@ -363,6 +396,9 @@ async def on_message(message):
 
     if cmd_question(message.content):
         await run_question(message)
+
+    if cmd_extra_question(message.content):
+        await run_extra_question(message)
 
     if cmd_contest(message.content):
         await run_contest(message)
