@@ -1,6 +1,7 @@
 import discord
 import sys
 import random
+import asyncio
 
 client = discord.Client()
 
@@ -56,6 +57,8 @@ extra_dictionary = init_dictionary('extra_dictionary_list')
 print('extra_dictionary size : ', len(extra_dictionary))
 token = read_token()
 active_channel_id = read_active_channel_id()
+lock = asyncio.Lock()
+
 
 # status
 question_solving = False
@@ -361,11 +364,13 @@ async def on_message(message):
     global question_solving
     global problem
     global answer
+    global lock
     if message.author == client.user:
         return
     if message.channel.id != active_channel_id:
         return
     if not client.user in message.mentions:
+        await lock.acquire()
         if len(message.mentions) == 0 and question_solving and len(message.content) == len(problem):
             if message.content == answer:
                 response = str(message.author) + ' さん、正解です！\n' + '正解は\"' + answer + '\"でした！'
@@ -374,6 +379,7 @@ async def on_message(message):
                 problem = ''
                 answer = ''
                 await contest_continue(message)
+        lock.release()
         return 
 
     if cmd_echo(message.content):
