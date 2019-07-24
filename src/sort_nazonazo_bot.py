@@ -5,9 +5,11 @@ class NazonazoDictionary:
 
     # 辞書となるリストとコマンド名を要求する
     def __init__(self, dictionary, cmd):
-        self.__cmd = cmd
+# 改行除去は本来するべきではない
+        self.__cmd = cmd.replace('\n', '')
         self.__dictionary = dictionary
         self.__size = len(dictionary)
+        self.__selected = True
 
     def getSize(self):
         return self.__size
@@ -17,6 +19,22 @@ class NazonazoDictionary:
 
     def getDictionary(self):
         return self.__dictionary
+
+    def isSelected(self):
+        return self.__selected
+
+    def select(self):
+        self.__selected = True
+
+    def cancel(self):
+        self.__selected = False
+
+    # 辞書選択の状態を変更
+    def setSelected(self, status:bool):
+        self.__selected = status
+
+    def getStatus(self):
+        return [self.__cmd, self.__size, self.__selected]
 
 
 class SortNazonazoBot:
@@ -35,6 +53,51 @@ class SortNazonazoBot:
         if len(dictionaries) == 0:
             print('dictionary not found')
 
+    def echo(self, cmd):
+        return cmd
+
+    def kick(self):
+        return 'ヒィンｗ'
+
+    def getCmdList(self):
+        return """
+echo: -echo
+出題: -prob
+extra出題: -english
+問題数を見る: -size
+問題のヒントを見る: -hint NUM
+問題を諦める: -giveup
+連続で問題を出す: -contest NUM
+連続で問題を出すのを中止する: -unrated
+困った時は: -reset
+botを落とす(再起動は出来ません): -bye
+"""
+
+    # 指定した名前で管理される辞書の単語数を取得
+    def getDicSize(self, dic:str):
+        tmp = list(filter(lambda x:x.getCmd() == dic, self.__dictionaries))
+        if len(tmp) <= 0:
+            return -1
+        else:
+            return tmp[0].getSize()
+
+    # 辞書選択の状態を変更
+    def setDicSelected(self, dic:str, status:bool):
+        tmp = list(filter(lambda x:x.getCmd() == dic, self.__dictionaries))
+        if len(tmp) <= 0:
+            print('log: ' + dic + ' not found.')
+        else:
+            print('log: set ' + dic + '(' + str(tmp[0].isSelected()) + ') to ' + str(status))
+            tmp[0].setSelected(status)
+
+    # 保持する全ての辞書の名前をリストで取得
+    def getDicNameList(self):
+        return list(map(lambda x:x.getCmd(), self.__dictionaries))
+
+    # 保持する全ての辞書の名前と登録単語数をリストで取得
+    def getAllDicStatus(self):
+        return list(map(lambda x:x.getStatus(), self.__dictionaries))
+
 def test(src):
     try:
         dictionary_list_file = open(src, 'r')
@@ -50,7 +113,7 @@ def test(src):
                 dic = []
                 for sentence in dictionary_file:
                     dic.append(sentence.replace('\n','').split(' '))
-                dictionaries.append(NazonazoDictionary(dic, info[1]))
+                dictionaries.append(NazonazoDictionary(dic, info[1].replace('\n', '')))
                 print(' size : ' + str(len(dic)))
             except:
                 print('file could not read')
@@ -60,6 +123,10 @@ def test(src):
         sys.exit()
 
 bot = test('dictionary_list')
+print(bot.getAllDicStatus())
+print(bot.getDicNameList())
+bot.setDicSelected(bot.getDicNameList()[0], False)
+print(bot.getAllDicStatus())
 
 '''
 
