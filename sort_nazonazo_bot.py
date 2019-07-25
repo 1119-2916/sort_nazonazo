@@ -372,7 +372,7 @@ async def on_message(message):
     if not client.user in message.mentions:
         await lock.acquire()
         if len(message.mentions) == 0 and question_solving and len(message.content) == len(problem):
-            if message.content == answer:
+            if message.content in dictionary and sorted(message.content) == sorted(answer):
                 response = str(message.author) + ' さん、正解です！\n' + '正解は\"' + answer + '\"でした！'
                 await message.channel.send(response)
                 question_solving = False
