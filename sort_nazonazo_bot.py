@@ -370,13 +370,13 @@ async def on_message(message):
     global problem
     global answer
     global lock
-    global others
     if message.author == client.user:
         return
     if message.channel.id != active_channel_id:
         return
     if not client.user in message.mentions:
         await lock.acquire()
+        global others
         if len(message.mentions) == 0 and question_solving and len(message.content) == len(problem):
             if message.content == answer:
                 response = str(message.author) + ' さん、正解です！\n' + '正解は\"' + answer + '\"でした！'
@@ -386,10 +386,12 @@ async def on_message(message):
                 answer = ''
                 others = []
                 await contest_continue(message)
-            elif sorted(message.content) == sorted(problem) and not message.content in others and [message.content, problem] in dictionary:
-                response = str(message.author) + ' さん、 \"' + message.content + '\" は非想定解ですが正解です！'
+            elif sorted(message.content) == sorted(problem) and not (message.content in others):
+                print('accept answer ' + message.content)
                 others.append(message.content)
-                await message.channel.send(response)
+                if [message.content, problem] in dictionary:
+                    response = str(message.author) + ' さん、 \"' + message.content + '\" は非想定解ですが正解です！'
+                    await message.channel.send(response)
         lock.release()
         return 
 
