@@ -384,8 +384,9 @@ async def on_message(message):
                 question_solving = False
                 problem = ''
                 answer = ''
+                others = []
                 await contest_continue(message)
-            elif sorted(message.content) == sorted(answer) and not message.contest in others and message.content in dictionary:
+            elif sorted(message.content) == sorted(problem) and not message.content in others and [message.content, problem] in dictionary:
                 response = str(message.author) + ' さん、 \"' + message.content + '\" は非想定解ですが正解です！'
                 others.append(message.content)
                 await message.channel.send(response)
