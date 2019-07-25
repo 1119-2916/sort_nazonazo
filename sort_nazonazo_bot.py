@@ -67,6 +67,7 @@ contest_problem_num = 0;
 contest_solving_num = 0;
 problem = ''
 answer = ''
+others = []
 
 # 初期化
 def hard_reset():
@@ -82,6 +83,8 @@ def hard_reset():
     problem = ''
     global answer
     answer = ''
+    global others
+    others = []
 
 # コマンドを知るコマンドのパース
 def cmd_list(cmd):
@@ -276,12 +279,14 @@ async def run_giveup(message):
     global question_solving
     global problem
     global answer
+    global others
     if question_solving:
         response = '正解は\"' + answer + '\"でした...'
         await message.channel.send(response)
         question_solving = False
         problem = ''
         answer = ''
+        others = []
         await contest_continue(message)
     else:
         response = '現在問題は出されていません'
@@ -365,6 +370,7 @@ async def on_message(message):
     global problem
     global answer
     global lock
+    global others
     if message.author == client.user:
         return
     if message.channel.id != active_channel_id:
@@ -379,6 +385,10 @@ async def on_message(message):
                 problem = ''
                 answer = ''
                 await contest_continue(message)
+            elif sorted(message.content) == sorted(answer) and not message.contest in others and message.content in dictionary:
+                response = str(message.author) + ' さん、 \"' + message.content + '\" は非想定解ですが正解です！'
+                others.append(message.content)
+                await message.channel.send(response)
         lock.release()
         return 
 
