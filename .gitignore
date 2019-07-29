@@ -5,3 +5,4 @@ script
 crawler
 trash
 __pycache__
+key/*

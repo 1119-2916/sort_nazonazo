@@ -66,12 +66,39 @@ class SortNazonazoBot:
     #__contest_solving_num = 0;
 
     # NazonazoDictionaryのリストを要求する
-    def __init__(self, dictionaries:NazonazoDictionaries):
+    def __init__(self, dictionaries:NazonazoDictionaries = []):
         self.__dictionaries = dictionaries
         print('dictionary size :' , len(dictionaries))
         if len(dictionaries) == 0:
             print('dictionary not found')
         self.reset()
+
+    # 指定したファイルパスからファイルを読んで辞書を読み込む
+    def readDictionaries(self, filePath:str):
+        try:
+            dictionary_list_file = open(filePath, 'r')
+            dictionaries:List[NazonazoDictionary] = []
+            for dictionary_file_name in dictionary_list_file:
+                print(dictionary_file_name.replace('\n',''), end='')
+                info = dictionary_file_name.split(' ')
+                if len(info) != 2:
+                    print('invalid file format.')
+                    continue
+                try:
+                    dictionary_file = open(info[0], 'r')
+                    dic:NazonazoList = []
+                    for sentence in dictionary_file:
+                        #print(type(sentence.replace('\n','').split(' ')))
+                        #dic.append(sentence.replace('\n','').split(' '))
+                        tmp = sentence.replace('\n','').split(' ')
+                        dic.append(Nazonazo(tmp[0], tmp[1]))
+                    dictionaries.append(NazonazoDictionary(dic, info[1].replace('\n', '')))
+                    print(' size : ' + str(len(dic)))
+                except:
+                    print('file could not read')
+            self.__dictionaries = dictionaries
+        except:
+            print('failed to find or read dictionary list file. check your dictionary list file')
             
     def reset(self):
         self.__nazonazo = None
@@ -203,8 +230,7 @@ def test(src):
     except:
         print('failed to find or read dictionary list file. check your dictionary list file')
         sys.exit()
-
-bot = test('dictionary_list')
+""" bot = test('dictionary_list')
 print(bot.getAllDicStatus())
 print(bot.getDicNameList())
 bot.setDicSelected(bot.getDicNameList()[0], False)
@@ -222,4 +248,4 @@ print(str(bot.isGenerated()) + 'bot.isGenerated()')
 print(str(bot.sendAnswer("hohoho")) + 'bot.sendAnswer("hohoho")')
 print(str(bot.clearProblem()) + 'bot.clearProblem()')
 print(str(bot.isGenerated()) + 'bot.isGenerated()')
-
+"""
