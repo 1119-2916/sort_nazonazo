@@ -159,10 +159,6 @@ async def run_quit(message):
     await message.channel.send('botを終了しました。')
     sys.exit()
 
-@client.event
-async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
-
 # 待望の機能
 def cmd_kick(cmd):
     if cmd.find('kick();') != -1:
@@ -174,6 +170,24 @@ def cmd_kick(cmd):
 # 待望のコマンド
 async def run_kick(message):
     await message.channel.send('ヒィンｗ')
+
+def getCmdList():
+    return """
+echo: -echo
+出題: -prob
+extra出題: -english
+問題数を見る: -size
+問題のヒントを見る: -hint NUM
+問題を諦める: -giveup
+連続で問題を出す: -contest NUM
+連続で問題を出すのを中止する: -unrated
+困った時は: -reset
+botを落とす(再起動は出来ません): -bye
+"""
+
+@client.event
+async def on_ready():
+    print('We have logged in as {0.user}'.format(client))
 
 @client.event
 async def on_message(message):

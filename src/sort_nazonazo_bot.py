@@ -25,7 +25,7 @@ class NazonazoDictionary:
 
     # 辞書となるリストとコマンド名を要求する
     def __init__(self, dictionary:NazonazoList, cmd:str):
-        # 改行除去は本来するべきではない
+        # 改行除去は本来ここでするべきではない
         self.__cmd = cmd.replace('\n', '')
         self.__dictionary = dictionary
         self.__size = len(dictionary)
@@ -88,8 +88,6 @@ class SortNazonazoBot:
                     dictionary_file = open(info[0], 'r')
                     dic:NazonazoList = []
                     for sentence in dictionary_file:
-                        #print(type(sentence.replace('\n','').split(' ')))
-                        #dic.append(sentence.replace('\n','').split(' '))
                         tmp = sentence.replace('\n','').split(' ')
                         dic.append(Nazonazo(tmp[0], tmp[1]))
                     dictionaries.append(NazonazoDictionary(dic, info[1].replace('\n', '')))
@@ -105,9 +103,6 @@ class SortNazonazoBot:
 
     def echo(self, cmd):
         return cmd
-
-    def kick(self):
-        return 'ヒィンｗ'
 
     def getCmdList(self):
         return """
