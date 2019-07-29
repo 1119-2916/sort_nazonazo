@@ -41,8 +41,8 @@ def read_active_channel_id():
 #print(str(bot.getProblem()) + 'bot.getProblem()')
 #print(str(bot.generateProblem()) + 'bot.generateProblem()')
 #print(str(bot.isGenerated()) + 'bot.isGenerated()')
-#print(str(bot.sendAnswer("hohoho")) + 'bot.sendAnswer("hohoho")')
-#print(str(bot.clearProblem()) + 'bot.clearProblem()')
+#print(str(bot.checkAnswer("hohoho")) + 'bot.checkAnswer("hohoho")')
+#print(str(bot.endProblem()) + 'bot.endProblem()')
 #print(str(bot.isGenerated()) + 'bot.isGenerated()')
 
 # init
@@ -191,18 +191,43 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    global lock
     if message.author == client.user:
         return
     if message.channel.id != active_channel_id:
         return
 
     await lock.acquire()
+    if client.user in message.mentions:
+        # コマンドのパース
+        print(message.content)
+        if len(message.content.split(' ')) > 1:
+            cmd = message.content.split(' ')[1]
+            print('receive : ' + cmd)
+            if cmd == '-echo':
+                response = bot.echo(message.content)
+                await message.channel.send(response)
+            elif cmd == '-kick();':
+                await message.channel.send('ヒィンｗ')
+            elif cmd == '-bye':
+                await run_quit(message)
+            elif cmd == '-prob':
+                if not bot.isGenerated():
+                    bot.generateProblem()
+                    print(bot.getProblem())
+                    await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + bot.getProblem().problem)
+                else:
+                    await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.getProblem().problem)
 
-    if cmd_kick(message.content):
-        await run_kick(message)
-
-    if cmd_quit(message.content):
-        await run_quit(message)
+    elif bot.isGenerated(): # 答えの確認
+        if bot.checkAnswer(message.content, str(message.author)):
+            win = bot.getWinnter()
+            response = win[0] + ' さん、正解です！\n' + '正解は\"' + message.content + '\"でした！'
+            await message.channel.send(response)
+            bot.endProblem()
+        elif bot.checkAnotherAnswer(message.content, str(message.author)):
+            response = str(message.author) + ' さん、 \"' + message.content + '\" は非想定解ですが正解です！'
+            await message.channel.send(response)
 
     lock.release()
 

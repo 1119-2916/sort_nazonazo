@@ -100,6 +100,9 @@ class SortNazonazoBot:
             
     def reset(self):
         self.__nazonazo = None
+        self.__answers = None
+        self.__winner = []
+        self.__anotherWinner = []
 
     def echo(self, cmd):
         return cmd
@@ -141,49 +144,66 @@ class SortNazonazoBot:
     def getAllDicStatus(self):
         return list(map(lambda x:x.getStatus(), self.__dictionaries))
 
-    # 選択されている辞書から問題を1問取ってくる ない場合は空のリストを返す
-    def selectProblem(self) -> Nazonazo:
-        print('log : call get Problem')
-        dic = []
-        for i in self.__dictionaries:
-            if i.isSelected():
-                dic.extend(i.getDictionary())
-                print('log : append ' + i.getCmd())
-        if len(dic) == 0:
-            print('log WARN : dic not found')
-            return None
-        return dic[random.randrange(len(dic))]
-
     # 現在出題している問題を取得 ない場合は None
     def getProblem(self) -> Nazonazo:
         return self.__nazonazo;
 
     # 問題生成 辞書から問題を1問選んでbotを出題状態にする
     def generateProblem(self):
+        print('log : call generate Problem')
         if self.__nazonazo is not None:
             print('log WARN : problem is selected')
             return False
-        prob:nazonazo = self.selectProblem()
-        if prob is None:
-            print('log WARN : faild to fetch nazonazo')
+        dic = [] # 選択されている辞書を連結する
+        for i in self.__dictionaries:
+            if i.isSelected():
+                dic.extend(i.getDictionary())
+                print('log : append ' + i.getCmd())
+        if len(dic) == 0:
+            print('log WARN : dic not found. failed to fetch nazonazo')
             return False
-        self.__nazonazo = prob
+        self.__nazonazo = dic[random.randrange(len(dic))]
+        self.__answers = set()
+        for i in dic:
+            self.__answers.add(i.answer)
         return True
 
     # 問題が生成されている状態かどうかを返す
     def isGenerated(self):
         return self.__nazonazo is not None
 
-    # 受け取った答えが正当か判定する
-    def sendAnswer(self, ans:str) -> bool:
+    # 受け取った答えが想定解か判定する
+    def checkAnswer(self, ans:str, user:str = None) -> bool:
         if self.__nazonazo is None:
             print('log WARN : problem is not generated')
             return False
-        return ans == self.__nazonazo.answer
+        if ans == self.__nazonazo.answer:
+            self.__winner.append(user)
+            return True
+        else:
+            return False
+
+    # 受け取った答えが非想定解か判定する
+    def checkAnotherAnswer(self, ans:str, user:str = None) -> bool:
+        if self.__nazonazo is None:
+            print('log WARN : problem is not generated')
+            return False
+        if sorted(ans) == sorted(self.__nazonazo.answer) and ans != self.__nazonazo.answer and ans in self.__answers:
+            self.__anotherWinner.append([ans, user])
+            return True
+
+    # 現在の正解者リストを取得
+    def getWinnter(self):
+        return self.__winner
+
+    # 現在の非想定解正解者リストを取得
+    def getAnotherWinner(self):
+        return self.__anotherWinner
     
     # 問題を出題していない状態にする
-    def clearProblem(self):
+    def endProblem(self):
         self.__nazonazo = None
+        self.__answers = None
 
 def test(src):
     try:
@@ -226,7 +246,7 @@ print(str(bot.isGenerated()) + 'bot.isGenerated()')
 print(str(bot.getProblem()) + 'bot.getProblem()')
 print(str(bot.generateProblem()) + 'bot.generateProblem()')
 print(str(bot.isGenerated()) + 'bot.isGenerated()')
-print(str(bot.sendAnswer("hohoho")) + 'bot.sendAnswer("hohoho")')
-print(str(bot.clearProblem()) + 'bot.clearProblem()')
+print(str(bot.checkAnswer("hohoho")) + 'bot.checkAnswer("hohoho")')
+print(str(bot.endProblem()) + 'bot.endProblem()')
 print(str(bot.isGenerated()) + 'bot.isGenerated()')
 """
