@@ -104,20 +104,6 @@ class SortNazonazoBot:
     def echo(self, cmd):
         return cmd
 
-    def getCmdList(self):
-        return """
-echo: -echo
-出題: -prob
-extra出題: -english
-問題数を見る: -size
-問題のヒントを見る: -hint NUM
-問題を諦める: -giveup
-連続で問題を出す: -contest NUM
-連続で問題を出すのを中止する: -unrated
-困った時は: -reset
-botを落とす(再起動は出来ません): -bye
-"""
-
     # 指定した名前で管理される辞書の単語数を取得
     def getDicSize(self, dic:str):
         tmp = list(filter(lambda x:x.getCmd() == dic, self.__dictionaries))
