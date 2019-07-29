@@ -4,3 +4,4 @@ test
 script
 crawler
 trash
+__pycache__
