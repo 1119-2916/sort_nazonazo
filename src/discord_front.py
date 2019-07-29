@@ -25,30 +25,9 @@ def read_active_channel_id():
         print('failed to find or read channel id file. check your channel id file')
     finally:
         return channel_id
-
-#bot = test('dictionary_list')
-#print(bot.getAllDicStatus())
-#print(bot.getDicNameList())
-#bot.setDicSelected(bot.getDicNameList()[0], False)
-#print(bot.getAllDicStatus())
-#bot.setDicSelected(bot.getDicNameList()[0], True)
-#bot.resetDicSelected()
-#print(bot.getAllDicStatus())
-#bot.selectAllDic()
-#print(str(bot.getAllDicStatus()) + 'bot.getAllDicStatus()')
-#print(str(bot.generateProblem()) + 'bot.generateProblem()')
-#print(str(bot.isGenerated()) + 'bot.isGenerated()')
-#print(str(bot.getProblem()) + 'bot.getProblem()')
-#print(str(bot.generateProblem()) + 'bot.generateProblem()')
-#print(str(bot.isGenerated()) + 'bot.isGenerated()')
-#print(str(bot.checkAnswer("hohoho")) + 'bot.checkAnswer("hohoho")')
-#print(str(bot.endProblem()) + 'bot.endProblem()')
-#print(str(bot.isGenerated()) + 'bot.isGenerated()')
-
 # init
 bot = SortNazonazoBot()
 bot.readDictionaries('dictionary_list')
-#print('dictionary size : ', len(dictionary))
 print('dictionary info : ')
 print(bot.getAllDicStatus())
 num = 0
@@ -61,46 +40,6 @@ if num == 0:
 token = read_token()
 active_channel_id = read_active_channel_id()
 lock = asyncio.Lock()
-
-# コマンドを知るコマンドのパース
-def cmd_list(cmd):
-    if cmd.find('-cmd') != -1:
-        print("cmd command is called")
-        return True
-    else:
-        return False
-
-# テスト用echoコマンドのパース
-def cmd_echo(cmd):
-    if cmd.find('-echo') != -1:
-        print("echo command is called")
-        return True
-    else:
-        return False
-
-# 問題数を知るコマンドのパース
-def cmd_problem_size(cmd):
-    if cmd.find('-size') != -1:
-        print("size command is called")
-        return True
-    else:
-        return False
-
-# 問題を出題するコマンドのパース
-def cmd_question(cmd):
-    if cmd.find('-prob') != -1:
-        print("prob command is called")
-        return True
-    else:
-        return False
-
-# extra問題を出題するコマンドのパース
-def cmd_extra_question(cmd):
-    if cmd.find('-english') != -1:
-        print("english command is called")
-        return True
-    else:
-        return False
 
 # コンテストを出題するコマンドのパース
 def cmd_contest(cmd):
@@ -121,35 +60,10 @@ def cmd_unrated(cmd):
         return False
 
 
-# 問題を諦めるコマンドのパース
-def cmd_giveup(cmd):
-    if cmd.find('-giveup') != -1:
-        print("giveup command is called")
-        return True
-    else:
-        return False
-
-
-# 問題のヒントを出すコマンドのパース
-def cmd_hint(cmd):
-    if cmd.find('-hint') != -1:
-        print("hint command is called")
-        return True
-    else:
-        return False
-
 # bot の状態を初期化するコマンドのパース
 def cmd_reset(cmd):
     if cmd.find('-reset') != -1:
         print("reset command is called")
-        return True
-    else:
-        return False
-
-# bot を終了するコマンドのパース
-def cmd_quit(cmd):
-    if cmd.find('-bye') != -1:
-        print("bye command is called")
         return True
     else:
         return False
@@ -159,24 +73,11 @@ async def run_quit(message):
     await message.channel.send('botを終了しました。')
     sys.exit()
 
-# 待望の機能
-def cmd_kick(cmd):
-    if cmd.find('kick();') != -1:
-        print("kick command is called")
-        return True
-    else:
-        return False
-
-# 待望のコマンド
-async def run_kick(message):
-    await message.channel.send('ヒィンｗ')
-
 def getCmdList():
     return """
 echo: -echo
 出題: -prob
-extra出題: -english
-問題数を見る: -size
+辞書の状態を見る: -dic
 問題のヒントを見る: -hint NUM
 問題を諦める: -giveup
 連続で問題を出す: -contest NUM
@@ -191,7 +92,6 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    global lock
     if message.author == client.user:
         return
     if message.channel.id != active_channel_id:
@@ -209,10 +109,17 @@ async def on_message(message):
                 response = bot.echo(message.content)
                 await message.channel.send(response)
             elif cmd == '-kick();':
+                print('log : kick call')
                 await message.channel.send('ヒィンｗ')
             elif cmd == '-bye':
+                print('log : bye call')
                 await run_quit(message)
+            elif cmd == '-cmd':
+                print('log : cmd call')
+                response = getCmdList()
+                await message.channel.send(response)
             elif cmd == '-prob':
+                print('log : prob call')
                 if not bot.isGenerated():
                     bot.generateProblem()
                     print(bot.getProblem())
@@ -220,6 +127,7 @@ async def on_message(message):
                 else:
                     await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.getProblem().problem)
             elif cmd == '-giveup':
+                print('log : giveup call')
                 if bot.isGenerated():
                     response = '正解は\"' + bot.getProblem().answer + '\"でした...'
                     await message.channel.send(response)
@@ -228,6 +136,7 @@ async def on_message(message):
                     response = '現在問題は出されていません'
                     await message.channel.send(response)
             elif cmd == '-dic':
+                print('log : dic call')
                 response = '現在の辞書の状態は以下です\n'
                 state = bot.getAllDicStatus()
                 for i in state:
@@ -242,7 +151,7 @@ async def on_message(message):
                     response = 'ヒントは \"-hint NUM \" の形式でのみ応答します'
                     await message.channel.send(response)
                 elif cmdlist[2] == 'NUM':
-                    response = 'NUM って言ったけどそうではなくて、数字を入れて下さい'
+                    response = 'NUM って言ったけどそうではなくて、NUM の部分には数字を入れて下さい'
                     await message.channel.send(response)
                 else:
                     try:
@@ -262,6 +171,7 @@ async def on_message(message):
                         await message.channel.send(response)
 
     elif bot.isGenerated(): # 答えの確認
+        print('check answer : ' + message.content)
         if bot.checkAnswer(message.content, str(message.author)):
             win = bot.getWinnter()
             response = win[0] + ' さん、正解です！\n' + '正解は\"' + message.content + '\"でした！'
