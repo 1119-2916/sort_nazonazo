@@ -203,6 +203,7 @@ async def on_message(message):
         print(message.content)
         if len(message.content.split(' ')) > 1:
             cmd = message.content.split(' ')[1]
+            cmdlist = message.content.split(' ')
             print('receive : ' + cmd)
             if cmd == '-echo':
                 response = bot.echo(message.content)
@@ -218,6 +219,47 @@ async def on_message(message):
                     await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + bot.getProblem().problem)
                 else:
                     await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.getProblem().problem)
+            elif cmd == '-giveup':
+                if bot.isGenerated():
+                    response = '正解は\"' + bot.getProblem().answer + '\"でした...'
+                    await message.channel.send(response)
+                    bot.endProblem()
+                else:
+                    response = '現在問題は出されていません'
+                    await message.channel.send(response)
+            elif cmd == '-dic':
+                response = '現在の辞書の状態は以下です\n'
+                state = bot.getAllDicStatus()
+                for i in state:
+                    response += '辞書名 : ' + i[0] + ' , 問題数 : ' + str(i[1]) + ' , 出題対象 : ' + str(i[2]) + '\n'
+                await message.channel.send(response)
+            elif cmd == '-hint':
+                print('log : hint call')
+                if not bot.isGenerated():
+                    response = '現在問題は出されていません'
+                    await message.channel.send(response)
+                elif len(cmdlist) != 3:
+                    response = 'ヒントは \"-hint NUM \" の形式でのみ応答します'
+                    await message.channel.send(response)
+                elif cmdlist[2] == 'NUM':
+                    response = 'NUM って言ったけどそうではなくて、数字を入れて下さい'
+                    await message.channel.send(response)
+                else:
+                    try:
+                        hint_length = int(cmdlist[2])
+                        if hint_length < 0:
+                            response = str(hint_length) + '文字のヒントは出せません…'
+                            await message.channel.send(response)
+                        elif hint_length > len(bot.getProblem().problem):
+                            response = str(hint_length) + '文字のヒントは出せません…\n答えが知りたい場合は -giveup コマンドを使用して下さい。'
+                            await message.channel.send(response)
+                        else:
+                            response = str(hint_length) + '文字のヒント:\n'
+                            response += '答えの先頭' + str(hint_length) + '文字は\"' + bot.getProblem().answer[0:hint_length] + '\"です'
+                            await message.channel.send(response)
+                    except:
+                        response = 'NUM の部分には数字を入れて下さい'
+                        await message.channel.send(response)
 
     elif bot.isGenerated(): # 答えの確認
         if bot.checkAnswer(message.content, str(message.author)):

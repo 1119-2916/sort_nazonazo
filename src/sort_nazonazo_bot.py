@@ -219,8 +219,6 @@ def test(src):
                 dictionary_file = open(info[0], 'r')
                 dic:NazonazoList = []
                 for sentence in dictionary_file:
-                    #print(type(sentence.replace('\n','').split(' ')))
-                    #dic.append(sentence.replace('\n','').split(' '))
                     tmp = sentence.replace('\n','').split(' ')
                     dic.append(Nazonazo(tmp[0], tmp[1]))
                 dictionaries.append(NazonazoDictionary(dic, info[1].replace('\n', '')))
