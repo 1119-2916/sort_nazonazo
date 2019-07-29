@@ -2,10 +2,29 @@ import sys
 import random
 from typing import List
 
+class Nazonazo:
+
+    def __init__(self, ans:str, prob:str):
+        self.__answer = ans
+        self.__problem = prob
+
+    def __repr__(self):
+        return "['%s', '%s']" % (self.answer, self.problem)
+
+    @property
+    def problem(self):
+        return self.__problem
+
+    @property
+    def answer(self):
+        return self.__answer
+
+NazonazoList = List[Nazonazo]
+
 class NazonazoDictionary:
 
     # 辞書となるリストとコマンド名を要求する
-    def __init__(self, dictionary:list, cmd:str):
+    def __init__(self, dictionary:NazonazoList, cmd:str):
         # 改行除去は本来するべきではない
         self.__cmd = cmd.replace('\n', '')
         self.__dictionary = dictionary
@@ -113,7 +132,7 @@ botを落とす(再起動は出来ません): -bye
         return list(map(lambda x:x.getStatus(), self.__dictionaries))
 
     # 選択されている辞書から問題を1問取ってくる ない場合は空のリストを返す
-    def getProblem(self):
+    def getProblem(self) -> Nazonazo:
         print('log : call get Problem')
         dic = []
         for i in self.__dictionaries:
@@ -125,10 +144,12 @@ botを落とす(再起動は出来ません): -bye
             return []
         return dic[random.randrange(len(dic))]
 
+    #def generateProblem
+
 def test(src):
     try:
         dictionary_list_file = open(src, 'r')
-        dictionaries: List[NazonazoDictionary] = []
+        dictionaries:List[NazonazoDictionary] = []
         for dictionary_file_name in dictionary_list_file:
             print(dictionary_file_name.replace('\n',''), end='')
             info = dictionary_file_name.split(' ')
@@ -137,9 +158,12 @@ def test(src):
                 continue
             try:
                 dictionary_file = open(info[0], 'r')
-                dic = []
+                dic:NazonazoList = []
                 for sentence in dictionary_file:
-                    dic.append(sentence.replace('\n','').split(' '))
+                    #print(type(sentence.replace('\n','').split(' ')))
+                    #dic.append(sentence.replace('\n','').split(' '))
+                    tmp = sentence.replace('\n','').split(' ')
+                    dic.append(Nazonazo(tmp[0], tmp[1]))
                 dictionaries.append(NazonazoDictionary(dic, info[1].replace('\n', '')))
                 print(' size : ' + str(len(dic)))
             except:
