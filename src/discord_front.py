@@ -73,15 +73,75 @@ async def run_quit(message):
     await message.channel.send('botを終了しました。')
     sys.exit()
 
+# 問題のヒントを得る
+async def run_hint(message):
+    cmdlist = message.content.split(' ')
+    if not bot.isGenerated():
+        response = '現在問題は出されていません'
+        await message.channel.send(response)
+    elif len(cmdlist) != 3:
+        response = 'ヒントは \"-hint NUM \" の形式でのみ応答します'
+        await message.channel.send(response)
+    elif cmdlist[2] == 'NUM':
+        response = 'NUM って言ったけどそうではなくて、NUM の部分には数字を入れて下さい'
+        await message.channel.send(response)
+    else:
+        try:
+            hint_length = int(cmdlist[2])
+            if hint_length < 0:
+                response = str(hint_length) + '文字のヒントは出せません…'
+                await message.channel.send(response)
+            elif hint_length > len(bot.getProblem().problem):
+                response = str(hint_length) + '文字のヒントは出せません…\n答えが知りたい場合は -giveup コマンドを使用して下さい。'
+                await message.channel.send(response)
+            else:
+                response = str(hint_length) + '文字のヒント:\n'
+                response += '答えの先頭' + str(hint_length) + '文字は\"' + bot.getProblem().answer[0:hint_length] + '\"です'
+                await message.channel.send(response)
+        except:
+            response = 'NUM の部分には数字を入れて下さい'
+            await message.channel.send(response)
+
+# 辞書を選択する
+async def run_select(message):
+    cmdlist = message.content.split(' ')
+    if len(cmdlist) != 3:
+        response = '辞書選択は \"-dic-select DIC_NAME \" の形式でのみ応答します\nDIC_NAMEには対象の辞書名を入れて下さい。辞書名の取得は -dic-status で可能です。'
+        await message.channel.send(response)
+    elif cmdlist[2] in bot.getDicNameList():
+        bot.setDicSelected(cmdlist[2], True)
+        response = '辞書 \"' + cmdlist[2] + '\" を出題対象にします。'
+        await message.channel.send(response)
+    else:
+        response = '\"' + cmdlist[2] + '\" という名前の辞書はありません。'
+        await message.channel.send(response)
+
+# 辞書を選択解除する
+async def run_deselect(message):
+    cmdlist = message.content.split(' ')
+    if len(cmdlist) != 3:
+        response = '辞書選択は \"-dic-deselect DIC_NAME \" の形式でのみ応答します\nDIC_NAMEには対象の辞書名を入れて下さい。辞書名の取得は -dic-status で可能です。'
+        await message.channel.send(response)
+    elif cmdlist[2] in bot.getDicNameList():
+        bot.setDicSelected(cmdlist[2], False)
+        response = '辞書 \"' + cmdlist[2] + '\" を出題対象から外します。'
+        await message.channel.send(response)
+    else:
+        response = '\"' + cmdlist[2] + '\" という名前の辞書はありません。'
+        await message.channel.send(response)
+
+
 def getCmdList():
     return """
 echo: -echo
 出題: -prob
-辞書の状態を見る: -dic
+辞書の状態を見る: -dic-status
+辞書を出題対象にする: -dic-select DIC_NAME
+辞書を出題対象から外す: -dic-deselect DIC_NAME
 問題のヒントを見る: -hint NUM
 問題を諦める: -giveup
-連続で問題を出す: -contest NUM
-連続で問題を出すのを中止する: -unrated
+#連続で問題を出す: -contest NUM
+#連続で問題を出すのを中止する: -unrated
 困った時は: -reset
 botを落とす(再起動は出来ません): -bye
 """
@@ -103,7 +163,6 @@ async def on_message(message):
         print(message.content)
         if len(message.content.split(' ')) > 1:
             cmd = message.content.split(' ')[1]
-            cmdlist = message.content.split(' ')
             print('receive : ' + cmd)
             if cmd == '-echo':
                 response = bot.echo(message.content)
@@ -118,12 +177,18 @@ async def on_message(message):
                 print('log : cmd call')
                 response = getCmdList()
                 await message.channel.send(response)
+            elif cmd == '-reset':
+                bot.reset()
+                bot.selectAllDic()
+                await message.channel.send('hard reset.')
             elif cmd == '-prob':
                 print('log : prob call')
                 if not bot.isGenerated():
-                    bot.generateProblem()
-                    print(bot.getProblem())
-                    await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + bot.getProblem().problem)
+                    if bot.generateProblem():
+                        print(bot.getProblem())
+                        await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + bot.getProblem().problem)
+                    else:
+                        await message.channel.send('何らかの理由で問題の生成に失敗しました。')
                 else:
                     await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.getProblem().problem)
             elif cmd == '-giveup':
@@ -135,7 +200,7 @@ async def on_message(message):
                 else:
                     response = '現在問題は出されていません'
                     await message.channel.send(response)
-            elif cmd == '-dic':
+            elif cmd == '-dic-status':
                 print('log : dic call')
                 response = '現在の辞書の状態は以下です\n'
                 state = bot.getAllDicStatus()
@@ -144,31 +209,27 @@ async def on_message(message):
                 await message.channel.send(response)
             elif cmd == '-hint':
                 print('log : hint call')
-                if not bot.isGenerated():
-                    response = '現在問題は出されていません'
-                    await message.channel.send(response)
-                elif len(cmdlist) != 3:
-                    response = 'ヒントは \"-hint NUM \" の形式でのみ応答します'
-                    await message.channel.send(response)
-                elif cmdlist[2] == 'NUM':
-                    response = 'NUM って言ったけどそうではなくて、NUM の部分には数字を入れて下さい'
-                    await message.channel.send(response)
-                else:
-                    try:
-                        hint_length = int(cmdlist[2])
-                        if hint_length < 0:
-                            response = str(hint_length) + '文字のヒントは出せません…'
-                            await message.channel.send(response)
-                        elif hint_length > len(bot.getProblem().problem):
-                            response = str(hint_length) + '文字のヒントは出せません…\n答えが知りたい場合は -giveup コマンドを使用して下さい。'
-                            await message.channel.send(response)
+                await run_hint(message)
+            elif cmd == '-dic-select':
+                print('log : select call')
+                await run_select(message)
+            elif cmd == '-dic-deselect':
+                print('log : deselect call')
+                await run_deselect(message)
+            elif cmd[0] == '-':
+                print('log : -XXX command call')
+                print(cmd[1:len(cmd)])
+                if cmd[1:len(cmd)] in bot.getDicNameList():
+                    if not bot.isGenerated():
+                        if bot.generateProblemWithSelect(cmd[1:len(cmd)]):
+                            print(bot.getProblem())
+                            await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + bot.getProblem().problem)
                         else:
-                            response = str(hint_length) + '文字のヒント:\n'
-                            response += '答えの先頭' + str(hint_length) + '文字は\"' + bot.getProblem().answer[0:hint_length] + '\"です'
-                            await message.channel.send(response)
-                    except:
-                        response = 'NUM の部分には数字を入れて下さい'
-                        await message.channel.send(response)
+                            await message.channel.send('何らかの理由で問題の生成に失敗しました。')
+                    else:
+                        await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.getProblem().problem)
+                else:
+                    await message.channel.send(cmd + ' コマンドは未定義です。')
 
     elif bot.isGenerated(): # 答えの確認
         print('check answer : ' + message.content)

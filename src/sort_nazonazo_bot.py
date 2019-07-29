@@ -115,7 +115,7 @@ class SortNazonazoBot:
         else:
             return tmp[0].getSize()
 
-    # 辞書選択の状態を変更 複数選択が可能
+    # 辞書選択の状態を変更 辞書は状態として複数選択が可能
     def setDicSelected(self, dic:str, status:bool):
         tmp = list(filter(lambda x:x.getCmd() == dic, self.__dictionaries))
         if len(tmp) <= 0:
@@ -159,6 +159,25 @@ class SortNazonazoBot:
             if i.isSelected():
                 dic.extend(i.getDictionary())
                 print('log : append ' + i.getCmd())
+        if len(dic) == 0:
+            print('log WARN : dic not found. failed to fetch nazonazo')
+            return False
+        self.__nazonazo = dic[random.randrange(len(dic))]
+        self.__answers = set()
+        for i in dic:
+            self.__answers.add(i.answer)
+        return True
+
+    # 辞書を選択して出題する
+    def generateProblemWithSelect(self, dic_name:str):
+        print('log : call generate Problem with select ' + dic_name)
+        if self.__nazonazo is not None:
+            print('log WARN : problem is selected')
+            return False
+        dic = [] # 選択されている辞書を連結する
+        for i in self.__dictionaries:
+            if i.getCmd() == dic_name:
+                dic.extend(i.getDictionary())
         if len(dic) == 0:
             print('log WARN : dic not found. failed to fetch nazonazo')
             return False
