@@ -1,11 +1,12 @@
 import sys
 import random
+from typing import List
 
 class NazonazoDictionary:
 
     # 辞書となるリストとコマンド名を要求する
-    def __init__(self, dictionary, cmd):
-# 改行除去は本来するべきではない
+    def __init__(self, dictionary:list, cmd:str):
+        # 改行除去は本来するべきではない
         self.__cmd = cmd.replace('\n', '')
         self.__dictionary = dictionary
         self.__size = len(dictionary)
@@ -36,6 +37,7 @@ class NazonazoDictionary:
     def getStatus(self):
         return [self.__cmd, self.__size, self.__selected]
 
+NazonazoDictionaries = List[NazonazoDictionary]
 
 class SortNazonazoBot:
     # private status
@@ -47,7 +49,7 @@ class SortNazonazoBot:
     #__answer = ''
 
     # NazonazoDictionaryのリストを要求する
-    def __init__(self, dictionaries):
+    def __init__(self, dictionaries:NazonazoDictionaries):
         self.__dictionaries = dictionaries
         print('dictionary size :' , len(dictionaries))
         if len(dictionaries) == 0:
@@ -81,7 +83,7 @@ botを落とす(再起動は出来ません): -bye
         else:
             return tmp[0].getSize()
 
-    # 辞書選択の状態を変更
+    # 辞書選択の状態を変更 複数選択が可能
     def setDicSelected(self, dic:str, status:bool):
         tmp = list(filter(lambda x:x.getCmd() == dic, self.__dictionaries))
         if len(tmp) <= 0:
@@ -90,6 +92,18 @@ botを落とす(再起動は出来ません): -bye
             print('log: set ' + dic + '(' + str(tmp[0].isSelected()) + ') to ' + str(status))
             tmp[0].setSelected(status)
 
+    # 辞書選択の状態を変更 複数選択が可能
+    def resetDicSelected(self):
+        print('log: reset all dic FALSE')
+        for i in self.__dictionaries:
+            i.cancel()
+
+    # 辞書選択の状態を変更 複数選択が可能
+    def selectAllDic(self):
+        print('log: set all dic TRUE')
+        for i in self.__dictionaries:
+            i.select()
+
     # 保持する全ての辞書の名前をリストで取得
     def getDicNameList(self):
         return list(map(lambda x:x.getCmd(), self.__dictionaries))
@@ -97,6 +111,19 @@ botを落とす(再起動は出来ません): -bye
     # 保持する全ての辞書の名前と登録単語数をリストで取得
     def getAllDicStatus(self):
         return list(map(lambda x:x.getStatus(), self.__dictionaries))
+
+    # 選択されている辞書から問題を1問取ってくる ない場合は空のリストを返す
+    def getProblem(self):
+        print('log : call get Problem')
+        dic = []
+        for i in self.__dictionaries:
+            if i.isSelected():
+                dic.extend(i.getDictionary())
+                print('log : append ' + i.getCmd())
+        if len(dic) == 0:
+            print('log : dic not found')
+            return []
+        return dic[random.randrange(len(dic))]
 
 def test(src):
     try:
@@ -127,6 +154,14 @@ print(bot.getAllDicStatus())
 print(bot.getDicNameList())
 bot.setDicSelected(bot.getDicNameList()[0], False)
 print(bot.getAllDicStatus())
+print(bot.getProblem())
+bot.setDicSelected(bot.getDicNameList()[0], True)
+bot.resetDicSelected()
+print(bot.getAllDicStatus())
+print(bot.getProblem())
+bot.selectAllDic()
+print(bot.getAllDicStatus())
+print(bot.getProblem())
 
 '''
 
