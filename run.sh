@@ -1,1 +1,2 @@
-python3 sort_nazonazo_bot.py
+cd src/.
+python3 discord_front.py
