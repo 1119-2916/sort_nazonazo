@@ -206,8 +206,10 @@ class SortNazonazoBot:
             print('log WARN : problem is not generated')
             return False
         if sorted(ans) == sorted(self.__nazonazo.answer) and ans != self.__nazonazo.answer and ans in self.__answers:
-            self.__another_winner.append([ans, user])
-            return True
+            if [ans, user] not in self.__another_winner:
+                self.__another_winner.append([ans, user])
+                return True
+        return False
 
     # 現在の正解者リストを取得
     def get_winnter(self):

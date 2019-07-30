@@ -48,19 +48,19 @@ async def run_quit(message):
 
 # 問題のヒントを得る
 async def run_hint(message):
-    cmdlist = message.content.split(' ')
+    cmd_list = list(filter(lambda x: len(x) > 0, message.content.split(' ')))
     if not bot.is_generated():
         response = '現在問題は出されていません'
         await message.channel.send(response)
-    elif len(cmdlist) != 3:
+    elif len(cmd_list) != 3:
         response = 'ヒントは \"-hint NUM \" の形式でのみ応答します'
         await message.channel.send(response)
-    elif cmdlist[2] == 'NUM':
+    elif cmd_list[2] == 'NUM':
         response = 'NUM って言ったけどそうではなくて、NUM の部分には数字を入れて下さい'
         await message.channel.send(response)
     else:
         try:
-            hint_length = int(cmdlist[2])
+            hint_length = int(cmd_list[2])
             if hint_length < 0:
                 response = str(hint_length) + '文字のヒントは出せません…'
                 await message.channel.send(response)
@@ -78,30 +78,30 @@ async def run_hint(message):
 
 # 辞書を選択する
 async def run_select(message):
-    cmdlist = message.content.split(' ')
-    if len(cmdlist) != 3:
+    cmd_list = list(filter(lambda x: len(x) > 0, message.content.split(' ')))
+    if len(cmd_list) != 3:
         response = '辞書選択は \"-dic-select DIC_NAME \" の形式でのみ応答します\nDIC_NAMEには対象の辞書名を入れて下さい。辞書名の取得は -dic-status で可能です。'
         await message.channel.send(response)
-    elif cmdlist[2] in bot.get_dic_name_list():
-        bot.set_dic_selected(cmdlist[2], True)
-        response = '辞書 \"' + cmdlist[2] + '\" を出題対象にします。'
+    elif cmd_list[2] in bot.get_dic_name_list():
+        bot.set_dic_selected(cmd_list[2], True)
+        response = '辞書 \"' + cmd_list[2] + '\" を出題対象にします。'
         await message.channel.send(response)
     else:
-        response = '\"' + cmdlist[2] + '\" という名前の辞書はありません。'
+        response = '\"' + cmd_list[2] + '\" という名前の辞書はありません。'
         await message.channel.send(response)
 
 # 辞書を選択解除する
 async def run_deselect(message):
-    cmdlist = message.content.split(' ')
-    if len(cmdlist) != 3:
+    cmd_list = list(filter(lambda x: len(x) > 0, message.content.split(' ')))
+    if len(cmd_list) != 3:
         response = '辞書選択は \"-dic-deselect DIC_NAME \" の形式でのみ応答します\nDIC_NAMEには対象の辞書名を入れて下さい。辞書名の取得は -dic-status で可能です。'
         await message.channel.send(response)
-    elif cmdlist[2] in bot.get_dic_name_list():
-        bot.set_dic_selected(cmdlist[2], False)
-        response = '辞書 \"' + cmdlist[2] + '\" を出題対象から外します。'
+    elif cmd_list[2] in bot.get_dic_name_list():
+        bot.set_dic_selected(cmd_list[2], False)
+        response = '辞書 \"' + cmd_list[2] + '\" を出題対象から外します。'
         await message.channel.send(response)
     else:
-        response = '\"' + cmdlist[2] + '\" という名前の辞書はありません。'
+        response = '\"' + cmd_list[2] + '\" という名前の辞書はありません。'
         await message.channel.send(response)
 
 # コンテストの問題を出す
@@ -121,21 +121,21 @@ async def run_contest_problem(message):
 
 # コンテストを開始する
 async def run_contest(message):
-    cmdlist = message.content.split(' ')
+    cmd_list = list(filter(lambda x: len(x) > 0, message.content.split(' ')))
     if bot.contest_running():
         response = 'コンテスト中です。コンテストの中止は -unrated で行えます。'
         await message.channel.send(response)
     elif bot.is_generated():
         await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.get_problem().problem)
-    elif len(cmdlist) != 3:
+    elif len(cmd_list) != 3:
         response = 'コンテストは \"-contest NUM \" の形式でのみ応答します'
         await message.channel.send(response)
-    elif cmdlist[2] == 'NUM':
+    elif cmd_list[2] == 'NUM':
         response = 'NUM って言ったけどそうではなくて、NUM の部分には数字を入れて下さい'
         await message.channel.send(response)
     else:
         try:
-            contest_problem_num = int(cmdlist[2])
+            contest_problem_num = int(cmd_list[2])
             if contest_problem_num < 0:
                 response = str(contest_problem_num) + '問のコンテストは出来ません…'
                 await message.channel.send(response)
@@ -221,8 +221,9 @@ async def on_message(message):
     if client.user in message.mentions:
         # コマンドのパース
         print(message.content)
-        if len(message.content.split(' ')) > 1:
-            cmd = message.content.split(' ')[1]
+        cmd_list = list(filter(lambda x: len(x) > 0, message.content.split(' ')))
+        if len(cmd_list) > 1:
+            cmd = cmd_list[1]
             print('receive : ' + cmd)
             if cmd == '-echo':
                 response = bot.echo(message.content)
