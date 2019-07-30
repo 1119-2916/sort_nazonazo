@@ -12,12 +12,12 @@ Ubuntu 16.04.6 LTS
 
 channel_id, token ファイルの設定が必要です。
 
-sort_nazonazo_bot.py がある場所と同じディレクトリに discord の bot 用 token を置きます。
+./key/. に discord の bot 用 token を置きます。
 ファイル名は token とし、トークンの文字列のみを持つようにして下さい。
 
 bot が動作するチャンネルを指定する必要があります。
 bot がいるサーバーの、動かしたいチャンネルの ID のみを持つファイルを
-同様に sort_nazonazo_bot.py がある場所と同じディレクトリにファイル名を channel_id として置いて下さい。
+同様に ./key/. にファイル名を channel_id として置いて下さい。
 
 run.sh で実行します。
 
@@ -27,7 +27,7 @@ run.sh で実行します。
 
 "問題の答え" "問題"
 
-となるように辞書を作って sort_nazonazo_bot.py と同じディレクトリに追加し、
-dictionary_list にファイル名を追加して下さい。
+となるように辞書を作って ./dics/. に追加し、
+./src/dictionary_list にファイル名を追加して下さい。
 
 詳しくは既存の 8moji.dic, dictionary_list を見ていただければと思います。
