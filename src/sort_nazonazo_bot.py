@@ -59,11 +59,6 @@ class NazonazoDictionary:
 NazonazoDictionaries = List[NazonazoDictionary]
 
 class SortNazonazoBot:
-    # private status
-    #__question_solving = False
-    #__contest_solving = False
-    #__contest_problem_num = 0;
-    #__contest_solving_num = 0;
 
     # NazonazoDictionaryのリストを要求する
     def __init__(self, dictionaries:NazonazoDictionaries = []):
@@ -103,6 +98,9 @@ class SortNazonazoBot:
         self.__answers = None
         self.__winner = []
         self.__anotherWinner = []
+        self.__contestCount = 0
+        self.__contestProblemNum = 0
+        self.__contestProblems = None
 
     def echo(self, cmd):
         return cmd
@@ -220,9 +218,80 @@ class SortNazonazoBot:
         return self.__anotherWinner
     
     # 問題を出題していない状態にする
-    def endProblem(self):
+    def end_problem(self):
         self.__nazonazo = None
         self.__answers = None
+        self.__anotherWinner = None
+
+    # コンテストを開始するために設定をする 設定の成功失敗を返す
+    def begin_contest(self, num:int):
+        print('log : call begin contest ' + str(num))
+        if self.__nazonazo is not None:
+            print('log WARN : problem is selected')
+            return False
+        if self.__contestCount != 0:
+            print('log WARN : contest is running')
+            return False
+        self.__contestCount = num
+        self.__contestProblemNum = num
+        dic = [] # 選択されている辞書を連結する
+        for i in self.__dictionaries:
+            if i.isSelected():
+                dic.extend(i.getDictionary())
+                print('log : append ' + i.getCmd())
+        if len(dic) == 0:
+            print('log WARN : dic not found. failed to fetch nazonazo')
+            return False
+        self.__contestProblems = dic
+        self.__answers = set()
+        for i in dic:
+            self.__answers.add(i.answer)
+        return True
+
+    def get_contest_problem_num(self):
+        return self.__contestProblemNum
+
+    def get_contest_problem_count(self):
+        return self.__contestCount
+
+    # コンテスト中かどうかを返す
+    def contestRunning(self):
+        return self.__contestProblemNum != 0
+
+    # コンテスト中かどうかを返す
+    def has_next_contest_problem(self):
+        return self.__contestCount != 0
+    
+    # コンテスト中なら次の問題を出す
+    def generateContestProblem(self):
+        print('log : call next problem in contest ' + str(self.__contestCount))
+        if self.__nazonazo is not None:
+            print('log WARN : problem is selected')
+            return False
+        if self.__contestProblemNum == 0 or self.__contestCount == 0:
+            print('log WARN : contest is not running')
+            return False
+        self.__nazonazo = self.__contestProblems[random.randrange(len(self.__contestProblems))]
+        return True
+
+    # コンテスト中なら問題の後処理をする
+    def end_contest_problem(self):
+        print('log : call clear problem in contest ' + str(self.__contestCount))
+        if self.__nazonazo is None:
+            print('log WARN : problem is not selected')
+            return False
+        if self.__contestProblemNum == 0:
+            print('log WARN : contest is not running')
+            return False
+        self.end_problem()
+        self.__contestCount -= 1;
+        return True
+
+    # コンテストの後処理
+    def end_contest(self):
+        self.__contestCount = 0
+        self.__contestProblemNum = 0
+        self.__contestProblems = None
 
 def test(src):
     try:
@@ -248,22 +317,4 @@ def test(src):
     except:
         print('failed to find or read dictionary list file. check your dictionary list file')
         sys.exit()
-""" bot = test('dictionary_list')
-print(bot.getAllDicStatus())
-print(bot.getDicNameList())
-bot.setDicSelected(bot.getDicNameList()[0], False)
-print(bot.getAllDicStatus())
-bot.setDicSelected(bot.getDicNameList()[0], True)
-bot.resetDicSelected()
-print(bot.getAllDicStatus())
-bot.selectAllDic()
-print(str(bot.getAllDicStatus()) + 'bot.getAllDicStatus()')
-print(str(bot.generateProblem()) + 'bot.generateProblem()')
-print(str(bot.isGenerated()) + 'bot.isGenerated()')
-print(str(bot.getProblem()) + 'bot.getProblem()')
-print(str(bot.generateProblem()) + 'bot.generateProblem()')
-print(str(bot.isGenerated()) + 'bot.isGenerated()')
-print(str(bot.checkAnswer("hohoho")) + 'bot.checkAnswer("hohoho")')
-print(str(bot.endProblem()) + 'bot.endProblem()')
-print(str(bot.isGenerated()) + 'bot.isGenerated()')
-"""
+
