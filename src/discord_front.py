@@ -167,7 +167,7 @@ async def run_unrated(message):
 async def check_answer(message):
     print('check answer : ' + message.content)
     if bot.check_answer(message.content, str(message.author)):
-        win = bot.getWinnter()
+        win = bot.get_winnter()
         response = win[0] + ' さん、正解です！\n' + '正解は\"' + message.content + '\"でした！'
         await message.channel.send(response)
         bot.end_problem()
@@ -179,7 +179,7 @@ async def check_answer(message):
 async def check_contest_answer(message):
     print('check contest answer : ' + message.content)
     if bot.check_answer(message.content, str(message.author)):
-        win = bot.getWinnter()
+        win = bot.get_winnter()
         response = win[0] + ' さん、正解です！\n' + '正解は\"' + message.content + '\"でした！'
         await message.channel.send(response)
         bot.end_contest_problem()
@@ -193,7 +193,7 @@ async def check_contest_answer(message):
         response = str(message.author) + ' さん、 \"' + message.content + '\" は非想定解ですが正解です！'
         await message.channel.send(response)
 
-def getCmdList():
+def get_cmd_list():
     return """
 echo: -echo
 出題: -prob
@@ -237,7 +237,7 @@ async def on_message(message):
                 await run_quit(message)
             elif cmd == '-cmd':
                 print('log : cmd call')
-                response = getCmdList()
+                response = get_cmd_list()
                 await message.channel.send(response)
             elif cmd == '-reset':
                 bot.reset()
@@ -258,14 +258,14 @@ async def on_message(message):
                 if bot.is_generated():
                     response = '正解は\"' + bot.get_problem().answer + '\"でした...'
                     await message.channel.send(response)
-                    bot.endProblem()
+                    bot.end_problem()
                 else:
                     response = '現在問題は出されていません'
                     await message.channel.send(response)
             elif cmd == '-dic-status':
                 print('log : dic call')
                 response = '現在の辞書の状態は以下です\n'
-                state = bot.get_all_dicStatus()
+                state = bot.get_all_dic_status()
                 for i in state:
                     response += '辞書名 : ' + i[0] + ' , 問題数 : ' + str(i[1]) + ' , 出題対象 : ' + str(i[2]) + '\n'
                 await message.channel.send(response)

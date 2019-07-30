@@ -69,9 +69,9 @@ class SortNazonazoBot:
         self.reset()
 
     # 指定したファイルパスからファイルを読んで辞書を読み込む
-    def read_dictionaries(self, filePath:str):
+    def read_dictionaries(self, file_path:str):
         try:
-            dictionary_list_file = open(filePath, 'r')
+            dictionary_list_file = open(file_path, 'r')
             dictionaries:List[NazonazoDictionary] = []
             for dictionary_file_name in dictionary_list_file:
                 print(dictionary_file_name.replace('\n',''), end='')
