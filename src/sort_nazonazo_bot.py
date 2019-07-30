@@ -221,7 +221,8 @@ class SortNazonazoBot:
     def end_problem(self):
         self.__nazonazo = None
         self.__answers = None
-        self.__another_winner = None
+        self.__another_winner = []
+        self.__winner = []
 
     # コンテストを開始するために設定をする 設定の成功失敗を返す
     def begin_contest(self, num:int):
@@ -283,7 +284,9 @@ class SortNazonazoBot:
         if self.__contest_problem_num == 0:
             print('log WARN : contest is not running')
             return False
-        self.end_problem()
+        self.__nazonazo = None
+        self.__another_winner = []
+        self.__winner = []
         self.__contest_count -= 1;
         return True
 
@@ -292,6 +295,7 @@ class SortNazonazoBot:
         self.__contest_count = 0
         self.__contest_problem_num = 0
         self.__contest_problems = None
+        self.__answers = None
 
 def test(src):
     try:

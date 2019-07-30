@@ -165,7 +165,6 @@ async def run_unrated(message):
 
 # 答えを判定する
 async def check_answer(message):
-    print('check answer : ' + message.content)
     if bot.check_answer(message.content, str(message.author)):
         win = bot.get_winnter()
         response = win[0] + ' さん、正解です！\n' + '正解は\"' + message.content + '\"でした！'
@@ -177,7 +176,6 @@ async def check_answer(message):
 
 # 答えを判定する(コンテスト中)
 async def check_contest_answer(message):
-    print('check contest answer : ' + message.content)
     if bot.check_answer(message.content, str(message.author)):
         win = bot.get_winnter()
         response = win[0] + ' さん、正解です！\n' + '正解は\"' + message.content + '\"でした！'
