@@ -27,13 +27,13 @@ def read_active_channel_id():
         return channel_id
 # init
 bot = SortNazonazoBot()
-bot.readDictionaries('dictionary_list')
+bot.read_dictionaries('dictionary_list')
 print('dictionary info : ')
-print(bot.getAllDicStatus())
+print(bot.get_all_dic_status())
 num = 0
-for i in bot.getDicNameList():
+for i in bot.get_dic_name_list():
     print('loaded dic name : ' + i)
-    num += bot.getDicSize(i)
+    num += bot.get_dic_size(i)
 if num == 0:
     print('problem not found')
     sys.exit()
@@ -49,7 +49,7 @@ async def run_quit(message):
 # 問題のヒントを得る
 async def run_hint(message):
     cmdlist = message.content.split(' ')
-    if not bot.isGenerated():
+    if not bot.is_generated():
         response = '現在問題は出されていません'
         await message.channel.send(response)
     elif len(cmdlist) != 3:
@@ -64,12 +64,12 @@ async def run_hint(message):
             if hint_length < 0:
                 response = str(hint_length) + '文字のヒントは出せません…'
                 await message.channel.send(response)
-            elif hint_length > len(bot.getProblem().problem):
+            elif hint_length > len(bot.get_problem().problem):
                 response = str(hint_length) + '文字のヒントは出せません…\n答えが知りたい場合は -giveup コマンドを使用して下さい。'
                 await message.channel.send(response)
             else:
                 response = str(hint_length) + '文字のヒント:\n'
-                response += '答えの先頭' + str(hint_length) + '文字は\"' + bot.getProblem().answer[0:hint_length] + '\"です'
+                response += '答えの先頭' + str(hint_length) + '文字は\"' + bot.get_problem().answer[0:hint_length] + '\"です'
                 await message.channel.send(response)
         except ValueError:
             response = 'ヒントは \"-hint NUM \" の形式でのみ応答します\n'
@@ -82,8 +82,8 @@ async def run_select(message):
     if len(cmdlist) != 3:
         response = '辞書選択は \"-dic-select DIC_NAME \" の形式でのみ応答します\nDIC_NAMEには対象の辞書名を入れて下さい。辞書名の取得は -dic-status で可能です。'
         await message.channel.send(response)
-    elif cmdlist[2] in bot.getDicNameList():
-        bot.setDicSelected(cmdlist[2], True)
+    elif cmdlist[2] in bot.get_dic_name_list():
+        bot.set_dic_selected(cmdlist[2], True)
         response = '辞書 \"' + cmdlist[2] + '\" を出題対象にします。'
         await message.channel.send(response)
     else:
@@ -96,8 +96,8 @@ async def run_deselect(message):
     if len(cmdlist) != 3:
         response = '辞書選択は \"-dic-deselect DIC_NAME \" の形式でのみ応答します\nDIC_NAMEには対象の辞書名を入れて下さい。辞書名の取得は -dic-status で可能です。'
         await message.channel.send(response)
-    elif cmdlist[2] in bot.getDicNameList():
-        bot.setDicSelected(cmdlist[2], False)
+    elif cmdlist[2] in bot.get_dic_name_list():
+        bot.set_dic_selected(cmdlist[2], False)
         response = '辞書 \"' + cmdlist[2] + '\" を出題対象から外します。'
         await message.channel.send(response)
     else:
@@ -106,27 +106,27 @@ async def run_deselect(message):
 
 # コンテストの問題を出す
 async def run_contest_problem(message):
-    if bot.isGenerated():
-        await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.getProblem().problem)
-    elif not bot.contestRunning():
+    if bot.is_generated():
+        await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.get_problem().problem)
+    elif not bot.contest_running():
         await message.channel.send('コンテスト中ではありません。')
     else:
-        if bot.generateContestProblem():
-            print(bot.getProblem())
+        if bot.generate_contest_problem():
+            print(bot.get_problem())
             now = str(bot.get_contest_problem_num() - bot.get_contest_problem_count() + 1)
             await message.channel.send('問 ' + now + ' (' + now + '/' + str(bot.get_contest_problem_num()) + ')')
-            await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + bot.getProblem().problem)
+            await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + bot.get_problem().problem)
         else:
             await message.channel.send('何らかの理由で問題の生成に失敗しました。')
 
 # コンテストを開始する
 async def run_contest(message):
     cmdlist = message.content.split(' ')
-    if bot.contestRunning():
+    if bot.contest_running():
         response = 'コンテスト中です。コンテストの中止は -unrated で行えます。'
         await message.channel.send(response)
-    elif bot.isGenerated():
-        await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.getProblem().problem)
+    elif bot.is_generated():
+        await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.get_problem().problem)
     elif len(cmdlist) != 3:
         response = 'コンテストは \"-contest NUM \" の形式でのみ応答します'
         await message.channel.send(response)
@@ -166,30 +166,30 @@ async def run_unrated(message):
 # 答えを判定する
 async def check_answer(message):
     print('check answer : ' + message.content)
-    if bot.checkAnswer(message.content, str(message.author)):
+    if bot.check_answer(message.content, str(message.author)):
         win = bot.getWinnter()
         response = win[0] + ' さん、正解です！\n' + '正解は\"' + message.content + '\"でした！'
         await message.channel.send(response)
         bot.end_problem()
-    elif bot.checkAnotherAnswer(message.content, str(message.author)):
+    elif bot.check_another_answer(message.content, str(message.author)):
         response = str(message.author) + ' さん、 \"' + message.content + '\" は非想定解ですが正解です！'
         await message.channel.send(response)
 
 # 答えを判定する(コンテスト中)
 async def check_contest_answer(message):
     print('check contest answer : ' + message.content)
-    if bot.checkAnswer(message.content, str(message.author)):
+    if bot.check_answer(message.content, str(message.author)):
         win = bot.getWinnter()
         response = win[0] + ' さん、正解です！\n' + '正解は\"' + message.content + '\"でした！'
         await message.channel.send(response)
         bot.end_contest_problem()
-        print('contest running is : ' + str(bot.contestRunning()))
+        print('contest running is : ' + str(bot.contest_running()))
         if bot.has_next_contest_problem():
             await run_contest_problem(message)
         else:
             await message.channel.send(str(bot.get_contest_problem_num()) + '問連続の出題が終了しました。')
             bot.end_contest()
-    elif bot.checkAnotherAnswer(message.content, str(message.author)):
+    elif bot.check_another_answer(message.content, str(message.author)):
         response = str(message.author) + ' さん、 \"' + message.content + '\" は非想定解ですが正解です！'
         await message.channel.send(response)
 
@@ -241,22 +241,22 @@ async def on_message(message):
                 await message.channel.send(response)
             elif cmd == '-reset':
                 bot.reset()
-                bot.selectAllDic()
+                bot.select_all_dic()
                 await message.channel.send('hard reset.')
             elif cmd == '-prob':
                 print('log : prob call')
-                if not bot.isGenerated():
-                    if bot.generateProblem():
-                        print(bot.getProblem())
-                        await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + bot.getProblem().problem)
+                if not bot.is_generated():
+                    if bot.generate_problem():
+                        print(bot.get_problem())
+                        await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + bot.get_problem().problem)
                     else:
                         await message.channel.send('何らかの理由で問題の生成に失敗しました。')
                 else:
-                    await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.getProblem().problem)
+                    await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.get_problem().problem)
             elif cmd == '-giveup':
                 print('log : giveup call')
-                if bot.isGenerated():
-                    response = '正解は\"' + bot.getProblem().answer + '\"でした...'
+                if bot.is_generated():
+                    response = '正解は\"' + bot.get_problem().answer + '\"でした...'
                     await message.channel.send(response)
                     bot.endProblem()
                 else:
@@ -265,7 +265,7 @@ async def on_message(message):
             elif cmd == '-dic-status':
                 print('log : dic call')
                 response = '現在の辞書の状態は以下です\n'
-                state = bot.getAllDicStatus()
+                state = bot.get_all_dicStatus()
                 for i in state:
                     response += '辞書名 : ' + i[0] + ' , 問題数 : ' + str(i[1]) + ' , 出題対象 : ' + str(i[2]) + '\n'
                 await message.channel.send(response)
@@ -287,21 +287,21 @@ async def on_message(message):
             elif cmd[0] == '-':
                 print('log : -XXX command call')
                 print(cmd[1:len(cmd)])
-                if cmd[1:len(cmd)] in bot.getDicNameList():
-                    if not bot.isGenerated():
-                        if bot.generateProblemWithSelect(cmd[1:len(cmd)]):
-                            print(bot.getProblem())
-                            await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + bot.getProblem().problem)
+                if cmd[1:len(cmd)] in bot.get_dic_name_list():
+                    if not bot.is_generated():
+                        if bot.generate_problem_with_select(cmd[1:len(cmd)]):
+                            print(bot.get_problem())
+                            await message.channel.send('ソートなぞなぞ ソート前の文字列な〜んだ？\n' + bot.get_problem().problem)
                         else:
                             await message.channel.send('何らかの理由で問題の生成に失敗しました。')
                     else:
-                        await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.getProblem().problem)
+                        await message.channel.send('前回の出題が解かれていません\n問題: ' + bot.get_problem().problem)
                 else:
                     await message.channel.send(cmd + ' コマンドは未定義です。')
 
-    elif bot.isGenerated(): # 答えの確認
+    elif bot.is_generated(): # 答えの確認
         print('check answer : ' + message.content)
-        if bot.contestRunning():
+        if bot.contest_running():
             await check_contest_answer(message)
         else:
             await check_answer(message)

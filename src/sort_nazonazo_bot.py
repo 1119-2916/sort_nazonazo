@@ -31,16 +31,16 @@ class NazonazoDictionary:
         self.__size = len(dictionary)
         self.__selected = True
 
-    def getSize(self):
+    def get_size(self):
         return self.__size
 
-    def getCmd(self):
+    def get_cmd(self):
         return self.__cmd
 
-    def getDictionary(self):
+    def get_dictionary(self):
         return self.__dictionary
 
-    def isSelected(self):
+    def is_selected(self):
         return self.__selected
 
     def select(self):
@@ -50,10 +50,10 @@ class NazonazoDictionary:
         self.__selected = False
 
     # 辞書選択の状態を変更
-    def setSelected(self, status:bool):
+    def set_selected(self, status:bool):
         self.__selected = status
 
-    def getStatus(self):
+    def get_status(self):
         return [self.__cmd, self.__size, self.__selected]
 
 NazonazoDictionaries = List[NazonazoDictionary]
@@ -69,7 +69,7 @@ class SortNazonazoBot:
         self.reset()
 
     # 指定したファイルパスからファイルを読んで辞書を読み込む
-    def readDictionaries(self, filePath:str):
+    def read_dictionaries(self, filePath:str):
         try:
             dictionary_list_file = open(filePath, 'r')
             dictionaries:List[NazonazoDictionary] = []
@@ -97,66 +97,66 @@ class SortNazonazoBot:
         self.__nazonazo = None
         self.__answers = None
         self.__winner = []
-        self.__anotherWinner = []
-        self.__contestCount = 0
-        self.__contestProblemNum = 0
-        self.__contestProblems = None
+        self.__another_winner = []
+        self.__contest_count = 0
+        self.__contest_problem_num = 0
+        self.__contest_problems = None
 
     def echo(self, cmd):
         return cmd
 
     # 指定した名前で管理される辞書の単語数を取得
-    def getDicSize(self, dic:str):
-        tmp = list(filter(lambda x:x.getCmd() == dic, self.__dictionaries))
+    def get_dic_size(self, dic:str):
+        tmp = list(filter(lambda x:x.get_cmd() == dic, self.__dictionaries))
         if len(tmp) <= 0:
             return -1
         else:
-            return tmp[0].getSize()
+            return tmp[0].get_size()
 
     # 辞書選択の状態を変更 辞書は状態として複数選択が可能
-    def setDicSelected(self, dic:str, status:bool):
-        tmp = list(filter(lambda x:x.getCmd() == dic, self.__dictionaries))
+    def set_dic_selected(self, dic:str, status:bool):
+        tmp = list(filter(lambda x:x.get_cmd() == dic, self.__dictionaries))
         if len(tmp) <= 0:
             print('log: ' + dic + ' not found.')
         else:
-            print('log: set ' + dic + '(' + str(tmp[0].isSelected()) + ') to ' + str(status))
-            tmp[0].setSelected(status)
+            print('log: set ' + dic + '(' + str(tmp[0].is_selected()) + ') to ' + str(status))
+            tmp[0].set_selected(status)
 
     # 辞書選択の状態を変更 複数選択が可能
-    def resetDicSelected(self):
+    def reset_dic_selected(self):
         print('log: reset all dic FALSE')
         for i in self.__dictionaries:
             i.cancel()
 
     # 辞書選択の状態を変更 複数選択が可能
-    def selectAllDic(self):
+    def select_all_dic(self):
         print('log: set all dic TRUE')
         for i in self.__dictionaries:
             i.select()
 
     # 保持する全ての辞書の名前をリストで取得
-    def getDicNameList(self):
-        return list(map(lambda x:x.getCmd(), self.__dictionaries))
+    def get_dic_name_list(self):
+        return list(map(lambda x:x.get_cmd(), self.__dictionaries))
 
     # 保持する全ての辞書の名前と登録単語数をリストで取得
-    def getAllDicStatus(self):
-        return list(map(lambda x:x.getStatus(), self.__dictionaries))
+    def get_all_dic_status(self):
+        return list(map(lambda x:x.get_status(), self.__dictionaries))
 
     # 現在出題している問題を取得 ない場合は None
-    def getProblem(self) -> Nazonazo:
+    def get_problem(self) -> Nazonazo:
         return self.__nazonazo;
 
     # 問題生成 辞書から問題を1問選んでbotを出題状態にする
-    def generateProblem(self):
+    def generate_problem(self):
         print('log : call generate Problem')
         if self.__nazonazo is not None:
             print('log WARN : problem is selected')
             return False
         dic = [] # 選択されている辞書を連結する
         for i in self.__dictionaries:
-            if i.isSelected():
-                dic.extend(i.getDictionary())
-                print('log : append ' + i.getCmd())
+            if i.is_selected():
+                dic.extend(i.get_dictionary())
+                print('log : append ' + i.get_cmd())
         if len(dic) == 0:
             print('log WARN : dic not found. failed to fetch nazonazo')
             return False
@@ -167,15 +167,15 @@ class SortNazonazoBot:
         return True
 
     # 辞書を選択して出題する
-    def generateProblemWithSelect(self, dic_name:str):
+    def generate_problem_with_select(self, dic_name:str):
         print('log : call generate Problem with select ' + dic_name)
         if self.__nazonazo is not None:
             print('log WARN : problem is selected')
             return False
         dic = [] # 選択されている辞書を連結する
         for i in self.__dictionaries:
-            if i.getCmd() == dic_name:
-                dic.extend(i.getDictionary())
+            if i.get_cmd() == dic_name:
+                dic.extend(i.get_dictionary())
         if len(dic) == 0:
             print('log WARN : dic not found. failed to fetch nazonazo')
             return False
@@ -186,11 +186,11 @@ class SortNazonazoBot:
         return True
 
     # 問題が生成されている状態かどうかを返す
-    def isGenerated(self):
+    def is_generated(self):
         return self.__nazonazo is not None
 
     # 受け取った答えが想定解か判定する
-    def checkAnswer(self, ans:str, user:str = None) -> bool:
+    def check_answer(self, ans:str, user:str = None) -> bool:
         if self.__nazonazo is None:
             print('log WARN : problem is not generated')
             return False
@@ -201,27 +201,27 @@ class SortNazonazoBot:
             return False
 
     # 受け取った答えが非想定解か判定する
-    def checkAnotherAnswer(self, ans:str, user:str = None) -> bool:
+    def check_another_answer(self, ans:str, user:str = None) -> bool:
         if self.__nazonazo is None:
             print('log WARN : problem is not generated')
             return False
         if sorted(ans) == sorted(self.__nazonazo.answer) and ans != self.__nazonazo.answer and ans in self.__answers:
-            self.__anotherWinner.append([ans, user])
+            self.__another_winner.append([ans, user])
             return True
 
     # 現在の正解者リストを取得
-    def getWinnter(self):
+    def get_winnter(self):
         return self.__winner
 
     # 現在の非想定解正解者リストを取得
-    def getAnotherWinner(self):
-        return self.__anotherWinner
+    def get_another_winner(self):
+        return self.__another_winner
     
     # 問題を出題していない状態にする
     def end_problem(self):
         self.__nazonazo = None
         self.__answers = None
-        self.__anotherWinner = None
+        self.__another_winner = None
 
     # コンテストを開始するために設定をする 設定の成功失敗を返す
     def begin_contest(self, num:int):
@@ -229,69 +229,69 @@ class SortNazonazoBot:
         if self.__nazonazo is not None:
             print('log WARN : problem is selected')
             return False
-        if self.__contestCount != 0:
+        if self.__contest_count != 0:
             print('log WARN : contest is running')
             return False
-        self.__contestCount = num
-        self.__contestProblemNum = num
+        self.__contest_count = num
+        self.__contest_problem_num = num
         dic = [] # 選択されている辞書を連結する
         for i in self.__dictionaries:
-            if i.isSelected():
-                dic.extend(i.getDictionary())
-                print('log : append ' + i.getCmd())
+            if i.is_selected():
+                dic.extend(i.get_dictionary())
+                print('log : append ' + i.get_cmd())
         if len(dic) == 0:
             print('log WARN : dic not found. failed to fetch nazonazo')
             return False
-        self.__contestProblems = dic
+        self.__contest_problems = dic
         self.__answers = set()
         for i in dic:
             self.__answers.add(i.answer)
         return True
 
     def get_contest_problem_num(self):
-        return self.__contestProblemNum
+        return self.__contest_problem_num
 
     def get_contest_problem_count(self):
-        return self.__contestCount
+        return self.__contest_count
 
     # コンテスト中かどうかを返す
-    def contestRunning(self):
-        return self.__contestProblemNum != 0
+    def contest_running(self):
+        return self.__contest_problem_num != 0
 
     # コンテスト中かどうかを返す
     def has_next_contest_problem(self):
-        return self.__contestCount != 0
+        return self.__contest_count != 0
     
     # コンテスト中なら次の問題を出す
-    def generateContestProblem(self):
-        print('log : call next problem in contest ' + str(self.__contestCount))
+    def generate_contest_problem(self):
+        print('log : call next problem in contest ' + str(self.__contest_count))
         if self.__nazonazo is not None:
             print('log WARN : problem is selected')
             return False
-        if self.__contestProblemNum == 0 or self.__contestCount == 0:
+        if self.__contest_problem_num == 0 or self.__contest_count == 0:
             print('log WARN : contest is not running')
             return False
-        self.__nazonazo = self.__contestProblems[random.randrange(len(self.__contestProblems))]
+        self.__nazonazo = self.__contest_problems[random.randrange(len(self.__contest_problems))]
         return True
 
     # コンテスト中なら問題の後処理をする
     def end_contest_problem(self):
-        print('log : call clear problem in contest ' + str(self.__contestCount))
+        print('log : call clear problem in contest ' + str(self.__contest_count))
         if self.__nazonazo is None:
             print('log WARN : problem is not selected')
             return False
-        if self.__contestProblemNum == 0:
+        if self.__contest_problem_num == 0:
             print('log WARN : contest is not running')
             return False
         self.end_problem()
-        self.__contestCount -= 1;
+        self.__contest_count -= 1;
         return True
 
     # コンテストの後処理
     def end_contest(self):
-        self.__contestCount = 0
-        self.__contestProblemNum = 0
-        self.__contestProblems = None
+        self.__contest_count = 0
+        self.__contest_problem_num = 0
+        self.__contest_problems = None
 
 def test(src):
     try:
