@@ -278,7 +278,7 @@ async def on_message(message):
                 print('log : deselect call')
                 await run_deselect(message)
             elif cmd == '-contest':
-                print('log : cotest call')
+                print('log : contest call')
                 await run_contest(message)
             elif cmd == '-unrated':
                 print('log : unrated call')

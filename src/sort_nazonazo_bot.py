@@ -235,8 +235,6 @@ class SortNazonazoBot:
         if self.__contest_count != 0:
             print('log WARN : contest is running')
             return False
-        self.__contest_count = num
-        self.__contest_problem_num = num
         dic = [] # 選択されている辞書を連結する
         for i in self.__dictionaries:
             if i.is_selected():
@@ -245,6 +243,8 @@ class SortNazonazoBot:
         if len(dic) == 0:
             print('log WARN : dic not found. failed to fetch nazonazo')
             return False
+        self.__contest_count = num
+        self.__contest_problem_num = num
         self.__contest_problems = dic
         self.__answers = set()
         for i in dic:
