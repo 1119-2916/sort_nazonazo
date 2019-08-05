@@ -97,8 +97,10 @@ class SortNazonazoBot:
         self.__nazonazo = None
         self.__answers = None
         self.__winner = []
-        self.__another_winner = []
+        self.__another_winner = {}
         self.__contest_count = 0
+        self.__contest_winner = {}
+        self.__contest_another_winner = {}
         self.__contest_problem_num = 0
         self.__contest_problems = None
 
@@ -195,19 +197,21 @@ class SortNazonazoBot:
             print('log WARN : problem is not generated')
             return False
         if ans == self.__nazonazo.answer:
-            self.__winner.append(user)
+            if user is not None:
+                self.__winner.append(user)
             return True
         else:
             return False
 
     # 受け取った答えが非想定解か判定する
+    # 同じ解答を複数人がする事に対応していない
     def check_another_answer(self, ans:str, user:str = None) -> bool:
         if self.__nazonazo is None:
             print('log WARN : problem is not generated')
             return False
         if sorted(ans) == sorted(self.__nazonazo.answer) and ans != self.__nazonazo.answer and ans in self.__answers:
-            if [ans, user] not in self.__another_winner:
-                self.__another_winner.append([ans, user])
+            if ans not in self.__another_winner:
+                self.__another_winner[ans] = user
                 return True
         return False
 
@@ -216,14 +220,22 @@ class SortNazonazoBot:
         return self.__winner
 
     # 現在の非想定解正解者リストを取得
-    def get_another_winner(self):
+    def get_another_winner(self) -> dict:
         return self.__another_winner
+    
+    # 現在のコンテストでの正解者リストを取得
+    def get_contest_winnter(self) -> dict:
+        return self.__contest_winner
+
+    # 現在のコンテストでの非想定解正解者リストを取得
+    def get_contest_another_winner(self) -> dict:
+        return self.__contest_another_winner
     
     # 問題を出題していない状態にする
     def end_problem(self):
         self.__nazonazo = None
         self.__answers = None
-        self.__another_winner = []
+        self.__another_winner = {}
         self.__winner = []
 
     # コンテストを開始するために設定をする 設定の成功失敗を返す
@@ -246,6 +258,8 @@ class SortNazonazoBot:
         self.__contest_count = num
         self.__contest_problem_num = num
         self.__contest_problems = dic
+        self.__contest_winner = {}
+        self.__contest_another_winner = {}
         self.__answers = set()
         for i in dic:
             self.__answers.add(i.answer)
@@ -287,7 +301,17 @@ class SortNazonazoBot:
             print('log WARN : contest is not running')
             return False
         self.__nazonazo = None
-        self.__another_winner = []
+        for i in self.__another_winner.values():
+            if i in self.__contest_another_winner:
+                self.__contest_another_winner[i] = self.__contest_another_winner[i] + 1
+            else:
+                self.__contest_another_winner[i] = 1
+        self.__another_winner = {}
+        for i in self.__winner:
+            if i in self.__contest_winner:
+                self.__contest_winner[i] = self.__contest_winner[i] + 1
+            else:
+                self.__contest_winner[i] = 1
         self.__winner = []
         self.__contest_count -= 1;
         return True
@@ -295,6 +319,8 @@ class SortNazonazoBot:
     # コンテストの後処理
     def end_contest(self):
         self.__contest_count = 0
+        self.__contest_winner = {}
+        self.__contest_another_winner = {}
         self.__contest_problem_num = 0
         self.__contest_problems = None
         self.__answers = None

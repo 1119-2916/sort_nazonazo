@@ -186,6 +186,27 @@ async def check_contest_answer(message):
             await run_contest_problem(message)
         else:
             await message.channel.send(str(bot.get_contest_problem_num()) + '問連続の出題が終了しました。')
+            winner = bot.get_contest_winnter()
+            another_winner = bot.get_contest_another_winner()
+            for i in another_winner.keys():
+                if i not in winner:
+                    winner[i] = another_winner[i]
+                else:
+                    winner[i] = winner[i]+another_winner[i]
+            result = []
+            print(winner)
+            for i, j in winner.items():
+                result.append([j, i])
+            result.sort()
+            result.reverse()
+            response = ''
+            if len(another_winner) == 0:
+                response = 'AC状況は以下です。\n'
+            else:
+                response = 'AC状況は以下です。(非想定解を含む)\n'
+            for i in result:
+                response += str(i[0]) + 'AC : ' + i[1] + '\n'
+            await message.channel.send(response)
             bot.end_contest()
     elif bot.check_another_answer(message.content, str(message.author)):
         response = str(message.author) + ' さん、 \"' + message.content + '\" は非想定解ですが正解です！'
