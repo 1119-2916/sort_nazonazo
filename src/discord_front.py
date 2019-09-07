@@ -264,6 +264,9 @@ async def on_message(message):
                 bot.reset()
                 bot.select_all_dic()
                 await message.channel.send('hard reset.')
+            elif cmd == '-pro':
+                print('log : pro call')
+                await message.channel.send('はいプロ 世界一ソートなぞなぞが上手 ソートなぞなぞ界のtourist ソートなぞなぞするために生まれてきた者')
             elif cmd == '-prob':
                 print('log : prob call')
                 if not bot.is_generated():
