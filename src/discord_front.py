@@ -249,13 +249,13 @@ async def on_message(message):
             if cmd == '-echo':
                 response = bot.echo(message.content)
                 await message.channel.send(response)
-            elif cmd == '-kick();':
+            elif cmd == '-kick();' or cmd == '-kick()' or cmd == '-kick' or cmd == '-kick;':
                 print('log : kick call')
                 await message.channel.send('ヒィンｗ')
             elif cmd == '-bye':
                 print('log : bye call')
                 await run_quit(message)
-            elif cmd == '-cmd':
+            elif cmd == '-cmd' or cmd == '-man' or cmd == '--man' or cmd == '-help' or cmd == '--help' or cmd == '-h':
                 print('log : cmd call')
                 response = get_cmd_list()
                 await message.channel.send(response)
