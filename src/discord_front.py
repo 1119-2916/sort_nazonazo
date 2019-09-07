@@ -225,6 +225,7 @@ echo: -echo
 #連続で問題を出すのを中止する: -unrated
 困った時は: -reset
 botを落とす(再起動は出来ません): -bye
+これを表示: -cmd か -help か --help か -h か -man か --man
 """
 
 @client.event
