@@ -225,6 +225,7 @@ echo: -echo
 #連続で問題を出すのを中止する: -unrated
 困った時は: -reset
 botを落とす(再起動は出来ません): -bye
+これを表示: -cmd か -help か --help か -h か -man か --man
 """
 
 @client.event
@@ -252,10 +253,16 @@ async def on_message(message):
             elif cmd == '-kick();':
                 print('log : kick call')
                 await message.channel.send('ヒィンｗ')
+            elif cmd == '-kick()' or cmd == '-kick' or cmd == '-kick;':
+                print('log : failed kick call')
+                await message.channel.send('申し訳ないのですが、 kick(); は kick(); の形式以外認められません…')
+            elif cmd.startswith('-kick(') and cmd.endsWith(');'):
+                print('log : failed kick call')
+                await message.channel.send('error: too many arguments to function ‘void kick()’')
             elif cmd == '-bye':
                 print('log : bye call')
                 await run_quit(message)
-            elif cmd == '-cmd':
+            elif cmd == '-cmd' or cmd == '-man' or cmd == '--man' or cmd == '-help' or cmd == '--help' or cmd == '-h':
                 print('log : cmd call')
                 response = get_cmd_list()
                 await message.channel.send(response)
@@ -263,6 +270,9 @@ async def on_message(message):
                 bot.reset()
                 bot.select_all_dic()
                 await message.channel.send('hard reset.')
+            elif cmd == '-pro':
+                print('log : pro call')
+                await message.channel.send('はいプロ 世界一ソートなぞなぞが上手 ソートなぞなぞ界のtourist ソートなぞなぞするために生まれてきた者')
             elif cmd == '-prob':
                 print('log : prob call')
                 if not bot.is_generated():
