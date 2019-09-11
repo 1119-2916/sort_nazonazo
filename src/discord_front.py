@@ -273,6 +273,9 @@ async def on_message(message):
             elif cmd == '-pro':
                 print('log : pro call')
                 await message.channel.send('はいプロ 世界一ソートなぞなぞが上手 ソートなぞなぞ界のtourist ソートなぞなぞするために生まれてきた者')
+            elif cmd == '-opr':
+                print('log : opr call')
+                await message.channel.send('    iorsttuいがきすぞぞぞぞぞぞたたてななななななにのはまめるれソソソトトトプローーー一上世手生界界者')
             elif cmd == '-prob':
                 print('log : prob call')
                 if not bot.is_generated():
