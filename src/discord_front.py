@@ -256,6 +256,9 @@ async def on_message(message):
             elif cmd == '-kick()' or cmd == '-kick' or cmd == '-kick;':
                 print('log : failed kick call')
                 await message.channel.send('申し訳ないのですが、 kick(); は kick(); の形式以外認められません…')
+            elif cmd.startswith('-kick(') and cmd.endsWith(');'):
+                print('log : failed kick call')
+                await message.channel.send('error: too many arguments to function ‘void kick()’')
             elif cmd == '-bye':
                 print('log : bye call')
                 await run_quit(message)
