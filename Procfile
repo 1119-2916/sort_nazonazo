@@ -1,1 +1,1 @@
-web: python3 slack_front.py
+web: python3 src/slack_front.py
