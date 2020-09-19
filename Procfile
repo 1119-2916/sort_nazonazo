@@ -1,1 +1,1 @@
-web: gunicorn slack_front:app --log-file=-
+web: python3 slack_front.py
